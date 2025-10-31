@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+:root {
+  --primary-color: oklch(0.8507 0.1741 94.9);
+  --primary-color-hover: oklch(
+    from var(--primary-color) calc(l - 0.05) calc(c + 0.2) h
+  );
+  --primary-contrast-color: oklch(0.3305 0.024 258.36);
+  --secondary-color: oklch(0.68 0.11 258);
+
+  --danger-color: oklch(0.5806 0.2061 32.82);
+  --success-color: oklch(0.52 0.22 145.06);
+  --foreground-color: oklch(0.3305 0.024 258.36);
+  --note-color: oklch(0.6131 0.0414 258.36);
+  --note-secondary-color: oklch(0.9025 0.0148 251.16);
+  --foreground-color-secondary: oklch(1 0 0);
+  --color-tone: oklch(1 0 0);
+  --border-color: oklch(0.5 0.0147 266.62);
+  --ocean-color-dark: oklch(0.88 0.04 241);
+  --ocean-color-light: oklch(0.98 0.015 205.9);
+
+  color: var(--foreground-color);
+  background-color: var(--color-tone);
+
+  font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark:root {
+  --foreground-color: oklch(0.92 0.0627 276.35);
+  --foreground-color-secondary: oklch(0.3305 0.024 258.36);
+  --color-tone: oklch(0.2128 0.0543 268.64);
+  --border-color: oklch(0.6 0.01 0);
+  --danger-color: oklch(0.65 0.22 24.15);
+  --ocean-color-dark: oklch(0.22 0.0738 262.91);
+  --ocean-color-light: oklch(0.46 0.1335 242.28);
+}
+
+@theme {
+  --font-sans: "Open Sans", sans-serif;
+  --font-decorative: "Merienda", cursive;
+  --color-primary: var(--primary-color);
+  --color-primary-hover: var(--primary-color-hover);
+  --color-primary-contrast: var(--primary-contrast-color);
+  --color-secondary: var(--secondary-color);
+
+  --color-foreground: var(--foreground-color);
+  --color-foreground-secondary: var(--foreground-color-secondary);
+  --color-note: var(--note-color);
+  --color-note-secondary: var(--note-secondary-color);
+  --color-tone: var(--color-tone);
+  --color-stroke: var(--border-color);
+  --color-danger: var(--danger-color);
+  --color-success: var(--success-color);
+
+  --shadow-base: 0 0 10px 1px var(--primary-color);
+  --text-tiny: 0.625rem;
+
+  --animate-appearing: appearing 0.5s ease-in-out 1;
+  @keyframes appearing {
+    0% {
+      transform: scale(0.65);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  --animate-shake: shake 0.5s linear 1;
+  @keyframes shake {
+    0% {
+      transform: scale(0.65) rotate(-90deg);
+      transform-origin: center center;
+    }
+    100% {
+      transform: scale(1) rotate(0);
+      transform-origin: center center;
+    }
+  }
+
+  --animate-rise: rise 6s linear forwards;
+  @keyframes rise {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-120vh) scale(1.8);
+      opacity: 0;
+    }
+  }
+
+  --animate-fade-in: fade-in 1s linear 1;
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+.light {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+@utility container {
+  @apply px-3 sm:px-4 lg:px-8 mx-auto;
+}
+
+@utility cell-size {
+  @apply h-8 w-8 xl:h-10 xl:w-10 2xl:h-12 2xl:w-12;
+}
+
+@utility list-dash {
+  & li {
+    @apply ps-2 relative;
+    &::before {
+      content: "-";
+      @apply absolute left-0;
+    }
+  }
+  @apply list-inside;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+#root {
+  width: 100%;
+}
+
+.ocean-bg {
+  background-image: linear-gradient(
+    0deg,
+    var(--ocean-color-dark),
+    var(--ocean-color-light)
+  );
+}

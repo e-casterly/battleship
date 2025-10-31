@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32">
+    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M15.599 30.061 3 22.616V8.872m12.599 21.19 12.599-7.446V8.872m-12.6 21.19V15.743M3 8.872 15.599 2l12.599 6.872M3 8.872l12.599 6.872m12.599-6.872-12.6 6.872"/>
+    <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/>
+    <circle cx="6.5" cy="14.5" r="1.5" fill="currentColor"/>
+    <circle cx="12" cy="17.5" r="1.5" fill="currentColor"/>
+    <circle cx="6.5" cy="20.5" r="1.5" fill="currentColor"/>
+    <circle cx="6.5" cy="20.5" r="1.5" fill="currentColor"/>
+    <circle cx="6.5" cy="20.5" r="1.5" fill="currentColor"/>
+    <circle cx="12" cy="23.5" r="1.5" fill="currentColor"/>
+    <circle cx="12" cy="23.5" r="1.5" fill="currentColor"/>
+    <circle cx="12" cy="23.5" r="1.5" fill="currentColor"/>
+    <circle cx="19.5" cy="23.5" r="1.5" fill="currentColor"/>
+    <circle cx="19.5" cy="23.5" r="1.5" fill="currentColor"/>
+    <circle cx="19.5" cy="23.5" r="1.5" fill="currentColor"/>
+    <circle cx="22.5" cy="19" r="1.5" fill="currentColor"/>
+    <circle cx="22.5" cy="19" r="1.5" fill="currentColor"/>
+    <circle cx="22.5" cy="19" r="1.5" fill="currentColor"/>
+    <circle cx="25.5" cy="14.5" r="1.5" fill="currentColor"/>
+    <circle cx="25.5" cy="14.5" r="1.5" fill="currentColor"/>
+    <circle cx="25.5" cy="14.5" r="1.5" fill="currentColor"/>
+</svg>
