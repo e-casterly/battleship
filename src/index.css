@@ -116,10 +116,6 @@
   color-scheme: dark;
 }
 
-html, body, #root {
-  touch-action: none;
-}
-
 @utility container {
   @apply px-3 sm:px-4 lg:px-8 mx-auto;
 }
