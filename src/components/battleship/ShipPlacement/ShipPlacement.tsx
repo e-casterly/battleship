@@ -79,7 +79,7 @@ export function ShipPlacement() {
     variant?: ShipType,
     index?: number,
   ) => {
-    console.log('onPointerDown', e);
+
     e.preventDefault();
     const shipId = e.currentTarget?.getAttribute("data-ship") || "";
     const coord = e.currentTarget?.getAttribute("data-coord") || "";
