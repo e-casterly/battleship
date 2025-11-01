@@ -1,6 +1,5 @@
 {
   "name": "battleship",
-  "homepage": "https://e-casterly.github.io/battleship/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
