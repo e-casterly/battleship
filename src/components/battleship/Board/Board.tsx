@@ -13,7 +13,6 @@ interface BoardProps {
   ownerId: PlayerId;
   className?: string;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
-  onPointerEnter?: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
 interface CellData {
@@ -27,7 +26,6 @@ export default function Board({
   ownerId,
   className,
   onPointerDown,
-  onPointerEnter,
 }: BoardProps) {
   const phase = useGameStore((s) => s.phase);
   const turn = useGameStore((s) => s.turn);
@@ -81,7 +79,6 @@ export default function Board({
                 key={key}
                 cellKey={key}
                 onPointerDown={onPointerDown}
-                onPointerEnter={onPointerEnter}
               />
             );
           }

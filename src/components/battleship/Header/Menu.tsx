@@ -27,7 +27,7 @@ export function Menu() {
       </Button>
       <nav
         className={cn(
-          "invisible h-screen fixed top-0 right-0 z-100 transition-all duration-150 ease-in-out translate-x-0",
+          "invisible h-screen max-md:w-full fixed top-0 right-0 z-100 transition-all duration-150 ease-in-out translate-x-0",
           {
             "translate-x-full": !isOpen,
             visible: isOpen,

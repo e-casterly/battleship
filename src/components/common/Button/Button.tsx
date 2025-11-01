@@ -39,7 +39,7 @@ export default function Button({
             size === "base" && variant === "contained",
         },
         {
-          "px-3 xl:px-4.5 py-1 xl:py-2 h-8 xl:h-10":
+          "px-2 md:px-3 xl:px-4.5 py-1 xl:py-2 h-8 xl:h-10":
             variant === "contained" && size === "base",
         },
         {

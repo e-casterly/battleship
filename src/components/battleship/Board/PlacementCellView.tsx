@@ -8,14 +8,12 @@ interface PlacementCellViewProps {
   shipId?: number;
   preview?: "ship" | "space" | undefined;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
-  onPointerEnter?: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
 export function PlacementCellView({
   isActiveShip = false,
   cellKey,
   onPointerDown,
-  onPointerEnter,
   shipId,
   preview,
   isSpace,
@@ -32,7 +30,6 @@ export function PlacementCellView({
       data-coord={cellKey}
       data-ship={shipId}
       onPointerDown={onPointerDown}
-      onPointerEnter={onPointerEnter}
     >
       {(isSpace || preview === "space") && (
         <div

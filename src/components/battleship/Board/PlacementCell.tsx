@@ -6,13 +6,11 @@ interface PlacementCellProps {
   isActive?: boolean;
   cellKey: string;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
-  onPointerEnter?: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
 export function PlacementCell({
   cellKey,
   onPointerDown,
-  onPointerEnter,
 }: PlacementCellProps) {
   const currentPlayerId = useGameStore((s) => s.currentPlayerId);
   const occupiedCell = useGameStore(
@@ -27,7 +25,6 @@ export function PlacementCell({
     <PlacementCellView
       cellKey={cellKey}
       onPointerDown={onPointerDown}
-      onPointerEnter={onPointerEnter}
       isActiveShip={isShip}
       isSpace={occupiedCell === "space"}
       shipId={isShip ? occupiedCell : undefined}

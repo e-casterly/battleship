@@ -26,7 +26,7 @@ export default function Game() {
             <History className="w-2/5 lg:w-xs" />
             <PlayerName id={players[1].id} name={players[1].name} reverse />
           </div>
-          <div className="w-full grid grid-cols-12 gap-1.5 sm:gap-4 md:gap-8 xl:gap-12">
+          <div className="w-full grid grid-cols-12 gap-3 sm:gap-4 md:gap-8 xl:gap-12">
             {players.map((player) => (
               <PlayerPart key={player.id} id={player.id} name={player.name} />
             ))}

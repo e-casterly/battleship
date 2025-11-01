@@ -34,6 +34,11 @@ export function ShipPlacement() {
     [setDragInfo],
   );
 
+  const placePreviewThrottled = useMemo(
+    () => throttleRaf((coord: string | null) => shipPlacement(coord, true)),
+    [shipPlacement]
+  );
+
   useEffect(() => {
     if (!isDraggable) return;
 
@@ -41,6 +46,12 @@ export function ShipPlacement() {
       const evs = e.getCoalescedEvents?.() as PointerEvent[] | undefined;
       const last = evs?.length ? evs[evs.length - 1] : e;
       setPosThrottled(last.clientX, last.clientY);
+
+      const el = document.elementFromPoint(last.clientX, last.clientY);
+      const coord = el?.getAttribute?.("data-coord");
+      if (coord) {
+        placePreviewThrottled(coord)
+      }
     };
 
     const onCancel = () => {
@@ -48,10 +59,9 @@ export function ShipPlacement() {
     };
 
     const onEnd = (e: PointerEvent) => {
-      const coord: string | null = (
-        e.target as HTMLButtonElement
-      )?.getAttribute("data-coord");
-      shipPlacement(coord);
+      const cell = document.elementFromPoint(e.clientX, e.clientY);
+      const coord = cell?.getAttribute?.("data-coord");
+      shipPlacement(coord ?? null);
     };
 
     document.addEventListener("pointermove", onMove);
@@ -62,13 +72,14 @@ export function ShipPlacement() {
       document.removeEventListener("pointerup", onEnd);
       document.removeEventListener("pointercancel", onCancel);
     };
-  }, [isDraggable, setPosThrottled, shipPlacement]);
+  }, [isDraggable, placePreviewThrottled, setPosThrottled, shipPlacement]);
 
   const onPointerDown = (
     e: React.PointerEvent<HTMLDivElement>,
     variant?: ShipType,
     index?: number,
   ) => {
+    console.log('onPointerDown', e);
     e.preventDefault();
     const shipId = e.currentTarget?.getAttribute("data-ship") || "";
     const coord = e.currentTarget?.getAttribute("data-coord") || "";
@@ -84,12 +95,6 @@ export function ShipPlacement() {
     });
   };
 
-  const onPointerEnter = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggable) return;
-    const coord: string | null = e.currentTarget?.getAttribute("data-coord");
-    shipPlacement(coord, true);
-  };
-
   return (
     <>
       <div className="flex justify-center">
@@ -101,8 +106,8 @@ export function ShipPlacement() {
         Hey, Captain! Place your ships and start the game!
       </p>
       <div className="grid grid-cols-12 gap-4 lg:gap-12">
-        <div className="col-span-12 lg:col-span-6 flex flex-col justify-start items-center lg:items-end">
-          <div className="flex justify-center gap-4 mb-4">
+        <div className="max-lg:order-first col-span-12 lg:col-span-6 flex flex-col justify-start items-center lg:items-end">
+          <div className="flex justify-center gap-2 md:gap-4 mb-4">
             <Button onClick={randomizeShipsLayout} icon={<Icon name="cube" />}>
               Randomize ships
             </Button>
@@ -113,7 +118,6 @@ export function ShipPlacement() {
           <Board
             ownerId={currentPlayerId}
             onPointerDown={onPointerDown}
-            onPointerEnter={onPointerEnter}
           />
         </div>
         <DirectionsColumn onPointerDown={onPointerDown} />
