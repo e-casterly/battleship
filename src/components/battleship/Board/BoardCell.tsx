@@ -48,7 +48,7 @@ export function BoardCell({
   return (
     <button
       className={cn(
-        "relative cell-size",
+        "relative cell-size overflow-visible",
         "inline-flex justify-center items-center",
         "border border-stroke",
         "disabled:pointer-events-none disabled:cursor-default",

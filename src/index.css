@@ -121,7 +121,7 @@
 }
 
 @utility cell-size {
-  @apply w-7.5 h-7.5 md:h-8 md:w-8 xl:h-10 xl:w-10 2xl:h-12 2xl:w-12;
+  @apply h-8 w-8 xl:h-10 xl:w-10 2xl:h-12 2xl:w-12;
 }
 
 @utility list-dash {

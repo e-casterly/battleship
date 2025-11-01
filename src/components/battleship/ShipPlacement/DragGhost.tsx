@@ -48,9 +48,10 @@ export function DragGhost() {
       ref={ghostRef}
       aria-hidden
       className={cn(
-        "fixed inset-0 z-50 pointer-events-none will-change-transform inline-flex self-start justify-self-start",
+        "fixed top-0 left-0 z-50 pointer-events-none will-change-transform inline-flex self-start justify-self-start",
+        !isDraggable && "opacity-0"
       )}
-      style={{ transform: "translate3d(-9999px,-9999px,0)" }}
+      style={{ transform: "translate3d(-100vw,-100vh,0)" }}
     >
       <div
         className={cn(
