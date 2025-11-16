@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --primary-color: oklch(0.8507 0.1741 94.9);
+  --primary-color: oklch(0.8941 0.167 94.9);
   --primary-color-hover: oklch(
     from var(--primary-color) calc(l - 0.05) calc(c + 0.2) h
   );

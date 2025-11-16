@@ -23,12 +23,12 @@ export function Toggle({
   label,
 }: ToggleProps) {
   return (
-    <ToggleCtx.Provider value={{ value: selectedValue, onChange }}>
+    <ToggleCtx value={{ value: selectedValue, onChange }}>
       <div className="inline-flex flex-col gap-y-0.5">
         {label && <div className="text-base font-decorative">{label}</div>}
         <div
           className={cn(
-            "inline-flex p-0.5 bg-note-secondary h-8 xl:h-10",
+            "inline-flex p-0.5 h-8 xl:h-10 border-stroke border bg-tone rounded-sm",
             className,
           )}
           role="group"
@@ -36,7 +36,7 @@ export function Toggle({
           {children}
         </div>
       </div>
-    </ToggleCtx.Provider>
+    </ToggleCtx>
   );
 }
 
@@ -52,10 +52,10 @@ export function ToggleButton({ children, value }: ToggleButtonProps) {
       onClick={() => ctx?.onChange(value)}
       tabIndex={0}
       className={cn(
-        "[&:not(:last-child)]:-me-px px-2.5 text-base font-normal whitespace-nowrap cursor-pointer font-decorative border border-tone text-primary-contrast",
+        "[&:not(:last-child)]:-me-px px-2.5 hover:bg-primary text-base font-normal whitespace-nowrap cursor-pointer font-decorative border-2 text-foreground",
         {
-          "bg-primary": selected,
-          "hover:bg-primary-hover": !selected,
+          "border-primary": selected,
+          "bg-transparent border-transparent": !selected,
         },
       )}
       aria-pressed={selected}
