@@ -20,8 +20,7 @@
   --ocean-color-light: oklch(0.98 0.015 205.9);
 
   color: var(--foreground-color);
-  background-color: var(--color-tone);
-
+  background-color: transparent;
   font-family: "Open Sans", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
@@ -37,11 +36,14 @@
   --foreground-color: oklch(0.92 0.0627 276.35);
   --foreground-color-secondary: oklch(0.3305 0.024 258.36);
   --color-tone: oklch(0.2128 0.0543 268.64);
+  --note-color: oklch(0.72 0.0414 258.36);
   --border-color: oklch(0.6 0.01 0);
   --danger-color: oklch(0.65 0.22 24.15);
   --ocean-color-dark: oklch(0.22 0.0738 262.91);
   --ocean-color-light: oklch(0.46 0.1335 242.28);
 }
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: "Open Sans", sans-serif;
@@ -135,12 +137,21 @@
   @apply list-inside;
 }
 
+@utility ocean-bg {
+  background-image: linear-gradient(
+    0deg,
+    var(--ocean-color-dark),
+    var(--ocean-color-light)
+  );
+}
+
 body {
   margin: 0;
   display: flex;
   place-items: center;
   min-height: 100vh;
   overflow-x: hidden;
+  @apply ocean-bg;
 }
 
 img {
@@ -150,12 +161,4 @@ img {
 
 #root {
   width: 100%;
-}
-
-.ocean-bg {
-  background-image: linear-gradient(
-    0deg,
-    var(--ocean-color-dark),
-    var(--ocean-color-light)
-  );
 }

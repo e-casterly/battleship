@@ -6,6 +6,7 @@ import { Toggle, ToggleButton } from "@components/common/Toggle/Toggle.tsx";
 import cn from "classnames";
 import { PlacementCellView } from "@components/battleship/Board/PlacementCellView.tsx";
 import Icon from "@components/common/Icon/Icon.tsx";
+import Button from "@components/common/Button/Button.tsx";
 
 interface DirectionsColumnProps {
   onPointerDown: (
@@ -21,6 +22,9 @@ export function DirectionsColumn({ onPointerDown }: DirectionsColumnProps) {
 
   const currentPlayerId = useGameStore((s) => s.currentPlayerId);
   const remainingShips = useGameStore((s) => s.remainingShips[currentPlayerId]);
+
+  const randomizeShipsLayout = useGameStore((s) => s.randomizeShipsLayout);
+  const customizeShipsLayout = useGameStore((s) => s.customizeShipsLayout);
 
   const switchDirection = useGameStore((s) => s.switchDirection);
 
@@ -41,11 +45,19 @@ export function DirectionsColumn({ onPointerDown }: DirectionsColumnProps) {
   }, [switchDirection]);
 
   return (
-    <div className="col-span-12 lg:col-span-6 flex flex-col gap-4 max-lg:order-first">
+    <div className="col-span-12 lg:col-span-6 flex flex-col gap-4 justify-self-center lg:justify-self-end">
+      <div className="flex justify-start gap-2 md:gap-4">
+        <Button onClick={randomizeShipsLayout} icon={<Icon name="cube" />}>
+          Randomize ships
+        </Button>
+        <Button onClick={customizeShipsLayout} icon={<Icon name="hand" />}>
+          Custom placement
+        </Button>
+      </div>
       <p className="font-decorative text-sm md:text-base xl:text-lg">
         Left ships to place: {leftToPlace}
       </p>
-      <ul className="text-sm md:text-base xl:text-lg list-dash text-note">
+      <ul className={cn("text-sm md:text-base xl:text-lg list-dash text-note")}>
         <li>Drag and drop your ships</li>
         <li className="inline-flex gap-2 items-center">
           <span>Press Space to rotate</span>
@@ -63,6 +75,7 @@ export function DirectionsColumn({ onPointerDown }: DirectionsColumnProps) {
         className={cn("flex gap-2 flex-wrap", {
           "flex-row items-start": direction === "v",
           "flex-col": direction === "h",
+          "hidden": leftToPlace === 0
         })}
       >
         {Object.keys(fleet).map((variant) => (

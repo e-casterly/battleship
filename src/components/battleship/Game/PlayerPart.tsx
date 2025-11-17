@@ -19,8 +19,8 @@ export function PlayerPart({ id }: PlayerPartProps) {
   );
 
   return (
-    <div className={cn("col-span-12 lg:col-span-6 flex flex-col items-center first:lg:items-end last:lg:items-start group", {
-      "max-lg:order-first": !isPlayer,
+    <div className={cn("col-span-12 md:col-span-6 flex flex-col items-center first:lg:items-end last:lg:items-start group", {
+      "max-md:order-first": !isPlayer,
     })}>
       <div className="flex flex-col lg:flex-row gap-x-4 group-[&:last-child]:lg:flex-row-reverse">
         <div className="flex flex-row lg:flex-col justify-between mb-1 sm:mb-2 lg:mb-0 lg:pt-6.5 flex-auto gap-1 sm:gap-2">

@@ -7,7 +7,6 @@ import { useEffect, useMemo } from "react";
 import { DragGhost } from "@components/battleship/ShipPlacement/DragGhost.tsx";
 import { throttleRaf } from "@utils/throttleRaf.ts";
 import { DirectionsColumn } from "@components/battleship/ShipPlacement/DirectionsColumn.tsx";
-import Icon from "@components/common/Icon/Icon.tsx";
 
 export function ShipPlacement() {
   const currentPlayerId = useGameStore((s) => s.currentPlayerId);
@@ -18,8 +17,6 @@ export function ShipPlacement() {
 
   const isReady = Object.values(remainingShips).every((count) => count === 0);
 
-  const randomizeShipsLayout = useGameStore((s) => s.randomizeShipsLayout);
-  const customizeShipsLayout = useGameStore((s) => s.customizeShipsLayout);
   const shipPlacement = useGameStore((s) => s.shipPlacement);
   const onStartDragging = useGameStore((s) => s.onStartDragging);
 
@@ -106,21 +103,13 @@ export function ShipPlacement() {
         Hey, Captain! Place your ships and start the game!
       </p>
       <div className="grid grid-cols-12 gap-4 lg:gap-12">
-        <div className="max-lg:order-first col-span-12 lg:col-span-6 flex flex-col justify-start items-center lg:items-end">
-          <div className="flex justify-center gap-2 md:gap-4 mb-4">
-            <Button onClick={randomizeShipsLayout} icon={<Icon name="cube" />}>
-              Randomize ships
-            </Button>
-            <Button onClick={customizeShipsLayout} icon={<Icon name="hand" />}>
-              Custom placement
-            </Button>
-          </div>
+        <DirectionsColumn onPointerDown={onPointerDown} />
+        <div className="col-span-12 lg:col-span-6 justify-self-center lg:justify-self-start">
           <Board
             ownerId={currentPlayerId}
             onPointerDown={onPointerDown}
           />
         </div>
-        <DirectionsColumn onPointerDown={onPointerDown} />
       </div>
       <DragGhost />
     </>

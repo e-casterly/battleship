@@ -14,7 +14,7 @@ export function PlayerName({
   const turn = useGameStore((s) => s.turn);
   return (
     <div
-      className={cn("flex items-center gap-2 flex-1 justify-end", {
+      className={cn("col-span-3 flex items-center gap-2 flex-1 justify-end", {
         "flex-row-reverse": reverse,
       })}
     >

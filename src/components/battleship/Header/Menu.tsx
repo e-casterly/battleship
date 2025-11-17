@@ -16,6 +16,11 @@ export function Menu() {
     setIsOpen(true);
   }
 
+  function handleClick(func: () => void) {
+    setIsOpen(false);
+    func();
+  }
+
   return (
     <>
       <Button
@@ -48,10 +53,10 @@ export function Menu() {
             </div>
             {phase !== "placement" && (
               <>
-                <Button variant="text" onClick={resetSameGame}>
+                <Button variant="text" onClick={() => handleClick(resetSameGame)}>
                   Reset
                 </Button>
-                <Button variant="text" onClick={startNewGame}>
+                <Button variant="text" onClick={() => handleClick(startNewGame)}>
                   Start new game
                 </Button>
               </>

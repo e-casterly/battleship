@@ -52,7 +52,7 @@ export function ToggleButton({ children, value }: ToggleButtonProps) {
       onClick={() => ctx?.onChange(value)}
       tabIndex={0}
       className={cn(
-        "[&:not(:last-child)]:-me-px px-2.5 hover:bg-primary text-base font-normal whitespace-nowrap cursor-pointer font-decorative border-2 text-foreground",
+        "[&:not(:last-child)]:-me-px px-2.5 text-foreground hover:bg-primary dark:hover:text-foreground-secondary text-base font-normal whitespace-nowrap cursor-pointer font-decorative border-2",
         {
           "border-primary": selected,
           "bg-transparent border-transparent": !selected,
