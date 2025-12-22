@@ -9,7 +9,7 @@ import {
   shuffleDirs,
 } from "@utils/helpers.ts";
 
-export function tryToGetPoints(
+export function getOccupiedPoints(
   boardSize: [number, number],
   freeCoords: Set<string>,
   startPoint: Coord,
@@ -57,7 +57,7 @@ export function generateShipPositions(
 
     const shuffledDirs = shuffleDirs();
     for (const dir of shuffledDirs) {
-      const occupiedPoints = tryToGetPoints(
+      const occupiedPoints = getOccupiedPoints(
         boardSize,
         freeCoordsSet,
         startPoint,
