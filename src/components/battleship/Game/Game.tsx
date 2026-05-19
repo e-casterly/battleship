@@ -1,4 +1,4 @@
-import { useGameStore } from "@utils/store.ts";
+import { useGameStore } from "@store/gameStore.ts";
 import { PlayerPart } from "@components/battleship/Game/PlayerPart.tsx";
 import { History } from "@components/battleship/History/History.tsx";
 import { ShipPlacement } from "@components/battleship/ShipPlacement/ShipPlacement.tsx";

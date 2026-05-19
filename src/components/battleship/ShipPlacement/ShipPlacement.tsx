@@ -1,6 +1,7 @@
 import Button from "@components/common/Button/Button.tsx";
 import Board from "@components/battleship/Board/Board.tsx";
-import { useGameStore } from "@utils/store.ts";
+import { useGameStore } from "@store/gameStore.ts";
+import { usePlacementStore } from "@store/placementStore.ts";
 import * as React from "react";
 import type { ShipType } from "@utils/gameTypes.ts";
 import { useEffect, useMemo } from "react";
@@ -10,18 +11,17 @@ import { DirectionsColumn } from "@components/battleship/ShipPlacement/Direction
 
 export function ShipPlacement() {
   const currentPlayerId = useGameStore((s) => s.currentPlayerId);
+  const startGame = useGameStore((s) => s.startGame);
 
-  const remainingShips = useGameStore((s) => s.remainingShips[currentPlayerId]);
-
-  const { isDraggable } = useGameStore((s) => s.dragInfo);
+  const remainingShips = usePlacementStore(
+    (s) => s.remainingShips[currentPlayerId],
+  );
+  const { isDraggable } = usePlacementStore((s) => s.dragInfo);
+  const shipPlacement = usePlacementStore((s) => s.shipPlacement);
+  const onStartDragging = usePlacementStore((s) => s.onStartDragging);
+  const setDragInfo = usePlacementStore((s) => s.setDragInfo);
 
   const isReady = Object.values(remainingShips).every((count) => count === 0);
-
-  const shipPlacement = useGameStore((s) => s.shipPlacement);
-  const onStartDragging = useGameStore((s) => s.onStartDragging);
-
-  const setDragInfo = useGameStore((s) => s.setDragInfo);
-  const startGame = useGameStore((s) => s.startGame);
 
   const setPosThrottled = useMemo(
     () =>

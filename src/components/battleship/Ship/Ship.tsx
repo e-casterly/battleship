@@ -1,6 +1,6 @@
 import Icon from "@components/common/Icon/Icon.tsx";
-import { useGameStore } from "@utils/store.ts";
-import cn from "classnames";
+import { usePlacementStore } from "@store/placementStore.ts";
+import cn from 'clsx';
 import type { FleetConfig, PlayerId } from "@utils/gameTypes.ts";
 
 interface ShipProps {
@@ -16,7 +16,7 @@ export default function Ship({
   size = 0,
   maxShips = 5,
 }: ShipProps) {
-  const count: number = useGameStore(
+  const count: number = usePlacementStore(
     (s) => s.remainingShips[playerId]?.[variant] || 0,
   );
   return (

@@ -1,5 +1,5 @@
 import { createContext, type PropsWithChildren, use } from "react";
-import cn from "classnames";
+import cn from 'clsx';
 
 type ToggleContext = {
   value: string;

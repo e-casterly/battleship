@@ -35,7 +35,7 @@ export const getNextPoint = (
     const dirs = getDirections(focusCoords);
     const shuffledDirs = shuffleDirs(dirs);
     const sideCoords: Coord[] = getSidePoints(focusCoords);
-    let newPoint = [];
+    let newPoint: Coord;
     for (const dir of shuffledDirs) {
       for (const sidePoint of sideCoords) {
         newPoint = sidePoint.map((item, index) => item + dir[index]) as Coord;

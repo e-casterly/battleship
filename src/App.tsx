@@ -1,7 +1,7 @@
 import Game from "@components/battleship/Game/Game.tsx";
 import { Header } from "@components/battleship/Header/Header.tsx";
 import { Bubbles } from "@components/battleship/Bubbles/Bubbles.tsx";
-import { useGameStore } from "@utils/store.ts";
+import { useGameStore } from "@store/gameStore.ts";
 
 function App() {
   const phase = useGameStore((s) => s.phase);

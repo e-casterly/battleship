@@ -1,9 +1,10 @@
 import * as React from "react";
 import type { ShipType } from "@utils/gameTypes.ts";
-import { useGameStore } from "@utils/store.ts";
+import { useGameStore } from "@store/gameStore.ts";
+import { usePlacementStore } from "@store/placementStore.ts";
 import { useEffect, useMemo } from "react";
 import { Toggle, ToggleButton } from "@components/common/Toggle/Toggle.tsx";
-import cn from "classnames";
+import cn from 'clsx';
 import { PlacementCellView } from "@components/battleship/Board/PlacementCellView.tsx";
 import Icon from "@components/common/Icon/Icon.tsx";
 import Button from "@components/common/Button/Button.tsx";
@@ -18,15 +19,15 @@ interface DirectionsColumnProps {
 
 export function DirectionsColumn({ onPointerDown }: DirectionsColumnProps) {
   const fleet = useGameStore((s) => s.fleetConfig);
-  const { direction } = useGameStore((s) => s.dragInfo);
-
   const currentPlayerId = useGameStore((s) => s.currentPlayerId);
-  const remainingShips = useGameStore((s) => s.remainingShips[currentPlayerId]);
 
-  const randomizeShipsLayout = useGameStore((s) => s.randomizeShipsLayout);
-  const customizeShipsLayout = useGameStore((s) => s.customizeShipsLayout);
-
-  const switchDirection = useGameStore((s) => s.switchDirection);
+  const { direction } = usePlacementStore((s) => s.dragInfo);
+  const remainingShips = usePlacementStore(
+    (s) => s.remainingShips[currentPlayerId],
+  );
+  const randomizeShipsLayout = usePlacementStore((s) => s.randomizeShipsLayout);
+  const customizeShipsLayout = usePlacementStore((s) => s.customizeShipsLayout);
+  const switchDirection = usePlacementStore((s) => s.switchDirection);
 
   const leftToPlace = useMemo(
     () => Object.values(remainingShips).reduce((acc, value) => acc + value, 0),

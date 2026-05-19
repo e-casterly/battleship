@@ -1,8 +1,8 @@
 import Icon from "@components/common/Icon/Icon.tsx";
 import Button from "@components/common/Button/Button.tsx";
-import { useGameStore } from "@utils/store.ts";
+import { useGameStore } from "@store/gameStore.ts";
 import { useState } from "react";
-import cn from "classnames";
+import cn from 'clsx';
 import { ThemeToggle } from "@components/battleship/Header/ThemeToggle.tsx";
 
 export function Menu() {

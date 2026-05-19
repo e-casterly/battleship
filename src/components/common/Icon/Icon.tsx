@@ -12,7 +12,7 @@ import HandIcon from "@assets/hand.svg?react";
 import HorizontalIcon from "@assets/horizontal.svg?react";
 import VerticalIcon from "@assets/vertical.svg?react";
 import ArrowIcon from "@assets/arrow.svg?react";
-import cn from "classnames";
+import cn from 'clsx';
 
 const ICONS = {
   menu: MenuIcon,

@@ -1,5 +1,5 @@
-import { useGameStore } from "@utils/store.ts";
-import cn from "classnames";
+import { useGameStore } from "@store/gameStore.ts";
+import cn from 'clsx';
 import Icon from "@components/common/Icon/Icon.tsx";
 
 export function PlayerName({

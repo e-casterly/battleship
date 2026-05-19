@@ -1,6 +1,7 @@
-import { useGameStore } from "@utils/store.ts";
+import { useGameStore } from "@store/gameStore.ts";
+import { usePlacementStore } from "@store/placementStore.ts";
 import type { PlayerId } from "@utils/gameTypes.ts";
-import cn from "classnames";
+import cn from 'clsx';
 import Icon from "@components/common/Icon/Icon.tsx";
 
 interface BoardCellProps {
@@ -17,7 +18,7 @@ export function BoardCell({
 }: BoardCellProps) {
   const turn = useGameStore((s) => s.turn);
 
-  const occupiedCell = useGameStore(
+  const occupiedCell = usePlacementStore(
     (s) => s.occupiedCells?.[ownerId]?.[cellKey],
   );
 

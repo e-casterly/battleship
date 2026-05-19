@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useGameStore } from "@utils/store.ts";
-import cn from "classnames";
+import { useGameStore } from "@store/gameStore.ts";
+import cn from 'clsx';
 
 export function History({ className }: { className?: string }) {
   const history = useGameStore((s) => s.history);

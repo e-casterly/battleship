@@ -1,10 +1,11 @@
 import { BoardCell } from "./BoardCell.tsx";
-import cn from "classnames";
+import cn from 'clsx';
 import { AxisY } from "@components/battleship/Board/AxisY.tsx";
 import { AxisX } from "@components/battleship/Board/AxisX.tsx";
 import { useMemo } from "react";
 import { getStringCoordinate, titleOfCell } from "@utils/helpers.ts";
-import { useGameStore } from "@utils/store.ts";
+import { useGameStore } from "@store/gameStore.ts";
+import { usePlacementStore } from "@store/placementStore.ts";
 import type { PlayerId } from "@utils/gameTypes.ts";
 import * as React from "react";
 import { PlacementCell } from "@components/battleship/Board/PlacementCell.tsx";
@@ -29,7 +30,7 @@ export default function Board({
 }: BoardProps) {
   const phase = useGameStore((s) => s.phase);
   const turn = useGameStore((s) => s.turn);
-  const isDragging = useGameStore((s) => s.dragInfo.isDraggable);
+  const isDragging = usePlacementStore((s) => s.dragInfo.isDraggable);
   const [rows, cols] = useGameStore((s) => s.boardSize);
 
   const boardCells: CellData[] = useMemo(() => {

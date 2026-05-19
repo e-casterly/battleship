@@ -3,16 +3,18 @@ import { useEffect, useState } from "react";
 
 export type Theme = "light" | "dark" | "system";
 
+function applyTheme(theme: Theme) {
+  const root = window.document.documentElement;
+  if (root.classList.contains(theme)) return;
+  root.classList.remove(theme === "light" ? "dark" : "light");
+  root.classList.add(theme);
+}
+
 export function ThemeToggle() {
-  const [theme, setTheme] = useState("system");
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem("theme") as Theme | null) ?? "system",
+  );
   const prefersDarkTheme = window.matchMedia("(prefers-color-scheme: dark)");
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme | null;
-    const initial = stored || "system";
-
-    setTheme(initial);
-  }, []);
 
   function handleTheme(value: Theme) {
     if (value === "system") {
@@ -43,13 +45,6 @@ export function ThemeToggle() {
     if (theme === "system") return;
     localStorage.setItem("theme", theme);
   }, [theme]);
-
-  function applyTheme(theme: Theme) {
-    const root = window.document.documentElement;
-    if (root.classList.contains(theme)) return;
-    root.classList.remove(theme === "light" ? "dark" : "light");
-    root.classList.add(theme);
-  }
 
   return (
     <Toggle

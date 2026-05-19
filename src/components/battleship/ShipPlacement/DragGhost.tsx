@@ -1,10 +1,10 @@
-import cn from "classnames";
-import { useGameStore } from "@utils/store.ts";
+import cn from 'clsx';
+import { usePlacementStore } from "@store/placementStore.ts";
 import { useEffect, useMemo, useRef } from "react";
 
 export function DragGhost() {
   const { isDraggable, direction, shipSize, indexCell, cellSize } =
-    useGameStore((s) => s.dragInfo);
+    usePlacementStore((s) => s.dragInfo);
 
   const isHorizontal = direction === "h";
   const ghostRef = useRef<HTMLDivElement>(null);
@@ -12,7 +12,7 @@ export function DragGhost() {
   useEffect(() => {
     if (!isDraggable) return;
 
-    const unsub = useGameStore.subscribe(
+    const unsub = usePlacementStore.subscribe(
       (s) => s.dragInfo.pos,
       (pos) => {
         if (!pos || !ghostRef.current) return;
