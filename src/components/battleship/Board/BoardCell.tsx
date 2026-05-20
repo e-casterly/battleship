@@ -1,5 +1,4 @@
 import { useGameStore } from "@store/gameStore.ts";
-import { usePlacementStore } from "@store/placementStore.ts";
 import type { PlayerId } from "@utils/gameTypes.ts";
 import cn from 'clsx';
 import Icon from "@components/common/Icon/Icon.tsx";
@@ -18,9 +17,7 @@ export function BoardCell({
 }: BoardCellProps) {
   const turn = useGameStore((s) => s.turn);
 
-  const occupiedCell = usePlacementStore(
-    (s) => s.occupiedCells?.[ownerId]?.[cellKey],
-  );
+  const occupiedCell = useGameStore((s) => s.occupiedCells?.[ownerId]?.[cellKey]);
 
   const isShip = typeof occupiedCell === "number";
 

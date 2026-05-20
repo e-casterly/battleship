@@ -1,5 +1,5 @@
 import Icon from "@components/common/Icon/Icon.tsx";
-import { usePlacementStore } from "@store/placementStore.ts";
+import { useGameStore } from "@store/gameStore.ts";
 import cn from 'clsx';
 import type { FleetConfig, PlayerId } from "@utils/gameTypes.ts";
 
@@ -16,7 +16,7 @@ export default function Ship({
   size = 0,
   maxShips = 5,
 }: ShipProps) {
-  const count: number = usePlacementStore(
+  const count: number = useGameStore(
     (s) => s.remainingShips[playerId]?.[variant] || 0,
   );
   return (
@@ -63,7 +63,7 @@ export default function Ship({
           <div
             key={index}
             className={cn(
-              "w-2.5 lg:w-3.5 relative border-stroke border [&:not(:last-child)]:border-b-0",
+              "w-2.5 lg:w-3.5 relative border-stroke border not-last:border-b-0",
               { "bg-primary/80": count > 0 },
               { "bg-note/80": count === 0 },
             )}

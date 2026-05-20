@@ -16,11 +16,8 @@ interface ShipPaletteProps {
 
 export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
   const fleet = useGameStore((s) => s.fleetConfig);
-  const currentPlayerId = useGameStore((s) => s.currentPlayerId);
   const direction = usePlacementStore((s) => s.direction);
-  const remainingShips = usePlacementStore(
-    (s) => s.remainingShips[currentPlayerId],
-  );
+  const remainingShips = usePlacementStore((s) => s.remainingShips);
 
   return (
     <div

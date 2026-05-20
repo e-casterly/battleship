@@ -1,4 +1,3 @@
-import { useGameStore } from "@store/gameStore.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
 import * as React from "react";
 import { PlacementCellView } from "@components/battleship/Board/PlacementCellView.tsx";
@@ -13,10 +12,7 @@ export function PlacementCell({
   cellKey,
   onPointerDown,
 }: PlacementCellProps) {
-  const currentPlayerId = useGameStore((s) => s.currentPlayerId);
-  const occupiedCell = usePlacementStore(
-    (s) => s.occupiedCells?.[currentPlayerId]?.[cellKey],
-  );
+  const occupiedCell = usePlacementStore((s) => s.occupiedCells?.[cellKey]);
   const preview = usePlacementStore(
     (s) => s.occupiedCellsPlacementPreview?.[cellKey],
   );

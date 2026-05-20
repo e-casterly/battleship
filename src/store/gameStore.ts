@@ -5,6 +5,8 @@ import {
   getInitialPlayers,
   setDataForPlayers,
   setFleetShots,
+  setOccupiedCellsForPlayers,
+  setRemainingShips,
 } from "@utils/storeHelpers.ts";
 import { getStringCoordinate, titleOfCell } from "@utils/helpers.ts";
 import { generateShipPositions } from "@utils/generateShipPositions.ts";
@@ -15,9 +17,11 @@ import type {
   FleetConfig,
   FleetShots,
   Hits,
+  OccupiedCells,
   PlayerData,
   PlayerId,
   Phase,
+  ShipsLayout,
   ShipType,
 } from "@utils/gameTypes.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
@@ -35,6 +39,9 @@ interface GameState {
   move: number;
   hits: Hits;
   fleetShots: FleetShots;
+  shipsLayout: ShipsLayout;
+  occupiedCells: Record<PlayerId, OccupiedCells>;
+  remainingShips: Record<PlayerId, Record<ShipType, number>>;
 }
 
 interface GameActions {
@@ -42,6 +49,7 @@ interface GameActions {
   startNewGame: () => void;
   resetSameGame: () => void;
   switchTurn: () => void;
+  changeRemainingShipAmount: (playerId: PlayerId, shipVariant: ShipType) => void;
   fire: (
     playerId: PlayerId,
     cellKey: string,
@@ -76,6 +84,9 @@ export const useGameStore = create<GameStore>()(
       move: 0,
       hits: setDataForPlayers(playersIds, {}),
       fleetShots: setDataForPlayers(playersIds, {}),
+      shipsLayout: setDataForPlayers(playersIds, [] as never),
+      occupiedCells: setDataForPlayers(playersIds, {} as OccupiedCells),
+      remainingShips: setDataForPlayers(playersIds, {} as Record<ShipType, number>),
 
       switchTurn: () => {
         const currentTurn = get().turn;
@@ -88,11 +99,37 @@ export const useGameStore = create<GameStore>()(
         }
       },
 
-      startGame: () => {
-        const { shipsLayout } = usePlacementStore.getState();
-        usePlacementStore.getState().initRemainingShipsForGame();
+      changeRemainingShipAmount: (playerId, shipVariant) => {
         set(
-          { phase: "in-game", fleetShots: setFleetShots(get().playersIds, shipsLayout) },
+          {
+            remainingShips: {
+              ...get().remainingShips,
+              [playerId]: {
+                ...get().remainingShips[playerId],
+                [shipVariant]: get().remainingShips[playerId][shipVariant] - 1,
+              },
+            },
+          },
+          false,
+          "changeRemainingShipAmount",
+        );
+      },
+
+      startGame: () => {
+        const { layout } = usePlacementStore.getState();
+        const aiLayout = generateShipPositions(boardSize, fleetConfig);
+        const shipsLayout: ShipsLayout = {
+          [currentPlayerId]: layout,
+          [playersIds[1]]: aiLayout,
+        };
+        set(
+          {
+            phase: "in-game",
+            shipsLayout,
+            occupiedCells: setOccupiedCellsForPlayers(playersIds, shipsLayout),
+            remainingShips: setDataForPlayers(playersIds, setRemainingShips(fleetConfig)),
+            fleetShots: setFleetShots(get().playersIds, shipsLayout),
+          },
           false,
           "startGame",
         );
@@ -101,13 +138,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       startNewGame: () => {
-        const layouts = setDataForPlayers(
-          get().playersIds,
-          generateShipPositions(get().boardSize, get().fleetConfig),
-          currentPlayerId,
-          [],
-        );
-        usePlacementStore.getState().resetPlacementState(layouts);
+        usePlacementStore.getState().resetPlacementState([]);
         useAiStore.getState().resetAiState();
         set(
           {
@@ -115,6 +146,9 @@ export const useGameStore = create<GameStore>()(
             turn: null,
             hits: setDataForPlayers(get().playersIds, {}),
             fleetShots: setDataForPlayers(get().playersIds, {}),
+            shipsLayout: setDataForPlayers(playersIds, [] as never),
+            occupiedCells: setDataForPlayers(playersIds, {} as OccupiedCells),
+            remainingShips: setDataForPlayers(playersIds, {} as Record<ShipType, number>),
             history: [],
             move: 0,
           },
@@ -132,6 +166,9 @@ export const useGameStore = create<GameStore>()(
             turn: null,
             hits: setDataForPlayers(get().playersIds, {}),
             fleetShots: setDataForPlayers(get().playersIds, {}),
+            shipsLayout: setDataForPlayers(playersIds, [] as never),
+            occupiedCells: setDataForPlayers(playersIds, {} as OccupiedCells),
+            remainingShips: setDataForPlayers(playersIds, {} as Record<ShipType, number>),
             history: [],
             move: 0,
           },
@@ -141,9 +178,8 @@ export const useGameStore = create<GameStore>()(
       },
 
       fire: (defenderId, cellKey) => {
-        const { occupiedCells, shipsLayout } = usePlacementStore.getState();
         const state = get();
-        const shipId = occupiedCells[defenderId]?.[cellKey];
+        const shipId = state.occupiedCells[defenderId]?.[cellKey];
 
         if (shipId !== undefined && typeof shipId === "number") {
           const newHitsAmount = state.fleetShots[defenderId][shipId] - 1;
@@ -162,20 +198,18 @@ export const useGameStore = create<GameStore>()(
           };
 
           if (isSunk) {
-            const shipType = shipsLayout[defenderId][shipId].type;
-            const shipCells = shipsLayout[defenderId][shipId].positions.map(
+            const shipType = state.shipsLayout[defenderId][shipId].type;
+            const shipCells = state.shipsLayout[defenderId][shipId].positions.map(
               (item) => getStringCoordinate(item),
             );
-            const marginCells = shipsLayout[defenderId][shipId].margins.map(
+            const marginCells = state.shipsLayout[defenderId][shipId].margins.map(
               (item) => getStringCoordinate(item),
             );
             for (const pos of shipCells) hits[defenderId][pos] = "sunk";
             for (const pos of marginCells) hits[defenderId][pos] = "miss";
 
             set({ hits, fleetShots }, false, "fire/sunk");
-            usePlacementStore
-              .getState()
-              .changeRemainingShipAmount(defenderId, shipType);
+            get().changeRemainingShipAmount(defenderId, shipType);
             return {
               result: "sunk",
               excludedCoords: [...shipCells, ...marginCells],

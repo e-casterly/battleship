@@ -1,6 +1,5 @@
 import * as React from "react";
 import type { ShipType } from "@utils/gameTypes.ts";
-import { useGameStore } from "@store/gameStore.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
 import { useMemo } from "react";
 import { Toggle, ToggleButton } from "@components/common/Toggle/Toggle.tsx";
@@ -18,12 +17,8 @@ interface PlacementPanelProps {
 }
 
 export function PlacementPanel({ onPointerDown }: PlacementPanelProps) {
-  const currentPlayerId = useGameStore((s) => s.currentPlayerId);
-
   const direction = usePlacementStore((s) => s.direction);
-  const remainingShips = usePlacementStore(
-    (s) => s.remainingShips[currentPlayerId],
-  );
+  const remainingShips = usePlacementStore((s) => s.remainingShips);
   const switchDirection = usePlacementStore((s) => s.switchDirection);
 
   const leftToPlace = useMemo(

@@ -2,12 +2,10 @@ import Button from "@components/common/Button/Button.tsx";
 import { useGameStore } from "@store/gameStore.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
 
+
 export function StartGame() {
-  const currentPlayerId = useGameStore((s) => s.currentPlayerId);
   const startGame = useGameStore((s) => s.startGame);
-  const remainingShips = usePlacementStore(
-    (s) => s.remainingShips[currentPlayerId],
-  );
+  const remainingShips = usePlacementStore((s) => s.remainingShips);
   const isReady = Object.values(remainingShips).every((count) => count === 0);
   return (
     <div className="flex justify-center">
