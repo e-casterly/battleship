@@ -26,12 +26,13 @@ export const useAiStore = create<AiStore>()(
       aiFocusCoords: [],
 
       resetAiState: () =>
-        set({
-          aiRemainingCoords: getFreeCoordsSet(BOARD_SIZE),
-          aiFocusCoords: [],
-        }),
+        set(
+          { aiRemainingCoords: getFreeCoordsSet(BOARD_SIZE), aiFocusCoords: [] },
+          false,
+          "resetAiState",
+        ),
 
-      setAiState: (state) => set(state),
+      setAiState: (state) => set(state, false, "setAiState"),
     }),
     { name: "AiStore" },
   ),

@@ -81,7 +81,7 @@ export const useGameStore = create<GameStore>()(
         const currentTurn = get().turn;
         const [player1, player2] = get().playersIds;
         const nextTurn = currentTurn === player1 ? player2 : player1;
-        set({ turn: nextTurn, move: get().move + 1 });
+        set({ turn: nextTurn, move: get().move + 1 }, false, "switchTurn");
         get().setHistory("turn", {});
         if (nextTurn !== currentPlayerId) {
           setTimeout(() => get().computerMove(), 600);
@@ -91,10 +91,11 @@ export const useGameStore = create<GameStore>()(
       startGame: () => {
         const { shipsLayout } = usePlacementStore.getState();
         usePlacementStore.getState().initRemainingShipsForGame();
-        set({
-          phase: "in-game",
-          fleetShots: setFleetShots(get().playersIds, shipsLayout),
-        });
+        set(
+          { phase: "in-game", fleetShots: setFleetShots(get().playersIds, shipsLayout) },
+          false,
+          "startGame",
+        );
         get().setHistory("start", {});
         get().switchTurn();
       },
@@ -108,27 +109,35 @@ export const useGameStore = create<GameStore>()(
         );
         usePlacementStore.getState().resetPlacementState(layouts);
         useAiStore.getState().resetAiState();
-        set({
-          phase: "placement",
-          turn: null,
-          hits: setDataForPlayers(get().playersIds, {}),
-          fleetShots: setDataForPlayers(get().playersIds, {}),
-          history: [],
-          move: 0,
-        });
+        set(
+          {
+            phase: "placement",
+            turn: null,
+            hits: setDataForPlayers(get().playersIds, {}),
+            fleetShots: setDataForPlayers(get().playersIds, {}),
+            history: [],
+            move: 0,
+          },
+          false,
+          "startNewGame",
+        );
       },
 
       resetSameGame: () => {
         usePlacementStore.getState().resetRemainingShips();
         useAiStore.getState().resetAiState();
-        set({
-          phase: "placement",
-          turn: null,
-          hits: setDataForPlayers(get().playersIds, {}),
-          fleetShots: setDataForPlayers(get().playersIds, {}),
-          history: [],
-          move: 0,
-        });
+        set(
+          {
+            phase: "placement",
+            turn: null,
+            hits: setDataForPlayers(get().playersIds, {}),
+            fleetShots: setDataForPlayers(get().playersIds, {}),
+            history: [],
+            move: 0,
+          },
+          false,
+          "resetSameGame",
+        );
       },
 
       fire: (defenderId, cellKey) => {
@@ -163,7 +172,7 @@ export const useGameStore = create<GameStore>()(
             for (const pos of shipCells) hits[defenderId][pos] = "sunk";
             for (const pos of marginCells) hits[defenderId][pos] = "miss";
 
-            set({ hits, fleetShots });
+            set({ hits, fleetShots }, false, "fire/sunk");
             usePlacementStore
               .getState()
               .changeRemainingShipAmount(defenderId, shipType);
@@ -174,16 +183,20 @@ export const useGameStore = create<GameStore>()(
             };
           }
 
-          set({ hits, fleetShots });
+          set({ hits, fleetShots }, false, "fire/hit");
           return { result: "hit", excludedCoords: [cellKey] };
         }
 
-        set({
-          hits: {
-            ...state.hits,
-            [defenderId]: { ...state.hits[defenderId], [cellKey]: "miss" },
+        set(
+          {
+            hits: {
+              ...state.hits,
+              [defenderId]: { ...state.hits[defenderId], [cellKey]: "miss" },
+            },
           },
-        });
+          false,
+          "fire/miss",
+        );
         return { result: "miss", excludedCoords: [cellKey] };
       },
 
@@ -250,7 +263,7 @@ export const useGameStore = create<GameStore>()(
         else if (event === "sunk")
           newNote = `- ${attackerName} sunk ${shipType} ship on ${cellTitle}`;
         else if (event === "win") newNote = `${attackerName} won the game!`;
-        set({ history: [...get().history, newNote] });
+        set({ history: [...get().history, newNote] }, false, "setHistory");
       },
 
       checkWinner: (defenderId) => {
@@ -260,7 +273,7 @@ export const useGameStore = create<GameStore>()(
         );
         if (total === 0) {
           get().setHistory("win", {});
-          set({ phase: "game-over", turn: null });
+          set({ phase: "game-over", turn: null }, false, "checkWinner");
           return true;
         }
         return false;

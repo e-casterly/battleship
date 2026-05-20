@@ -26,6 +26,7 @@ import type {
 } from "@utils/gameTypes.ts";
 
 interface PlacementState {
+  direction: "h" | "v";
   shipsLayout: ShipsLayout;
   occupiedCells: Record<PlayerId, OccupiedCells>;
   remainingShips: Record<PlayerId, Record<ShipType, number>>;
@@ -50,7 +51,8 @@ interface PlacementActions {
     y: number;
     cellSize: number;
   }) => void;
-  setDragInfo: (isReset: boolean, info?: Partial<DragInfo>) => void;
+  resetDragInfo: () => void;
+  updateDragInfo: (info: Partial<DragInfo>) => void;
   switchDirection: () => void;
   setPreviewCells: (shipPosition: ShipItemPosition | null) => void;
 }
@@ -65,7 +67,6 @@ const currentPlayerId = playersIds[0];
 const initialDragInfo: DragInfo = {
   isDraggable: false,
   pos: { x: 0, y: 0 },
-  direction: "h",
   shipId: null,
   occupiedCells: {},
   startPoint: null,
@@ -87,6 +88,7 @@ export const usePlacementStore = create<PlacementStore>()(
       const occupiedCells = setOccupiedCellsForPlayers(playersIds, shipsLayout);
 
       return {
+        direction: "h",
         shipsLayout,
         occupiedCells,
         occupiedCellsPlacementPreview: {},
@@ -97,92 +99,117 @@ export const usePlacementStore = create<PlacementStore>()(
         ),
 
         resetPlacementState: (layouts) => {
-          set({
-            shipsLayout: layouts,
-            occupiedCells: setOccupiedCellsForPlayers(playersIds, layouts),
-            remainingShips: setDataForPlayers(
-              playersIds,
-              setRemainingShips(fleetConfig),
-            ),
-            occupiedCellsPlacementPreview: {},
-            dragInfo: { ...initialDragInfo },
-          });
+          set(
+            {
+              direction: "h",
+              shipsLayout: layouts,
+              occupiedCells: setOccupiedCellsForPlayers(playersIds, layouts),
+              remainingShips: setDataForPlayers(
+                playersIds,
+                setRemainingShips(fleetConfig),
+              ),
+              occupiedCellsPlacementPreview: {},
+              dragInfo: { ...initialDragInfo },
+            },
+            false,
+            "resetPlacementState",
+          );
         },
 
         // used by resetSameGame: current player gets 0 (placed), others get full
         resetRemainingShips: () => {
-          set({
-            remainingShips: setDataForPlayers(
-              playersIds,
-              setRemainingShips(fleetConfig),
-              currentPlayerId,
-              setRemainingShips(fleetConfig, true),
-            ),
-          });
+          set(
+            {
+              remainingShips: setDataForPlayers(
+                playersIds,
+                setRemainingShips(fleetConfig),
+                currentPlayerId,
+                setRemainingShips(fleetConfig, true),
+              ),
+            },
+            false,
+            "resetRemainingShips",
+          );
         },
 
         // used by startGame: all players get full counts for the battle
         initRemainingShipsForGame: () => {
-          set({
-            remainingShips: setDataForPlayers(
-              playersIds,
-              setRemainingShips(fleetConfig),
-            ),
-          });
+          set(
+            {
+              remainingShips: setDataForPlayers(
+                playersIds,
+                setRemainingShips(fleetConfig),
+              ),
+            },
+            false,
+            "initRemainingShipsForGame",
+          );
         },
 
         randomizeShipsLayout: () => {
           const playerLayout = generateShipPositions(boardSize, fleetConfig);
-          set({
-            shipsLayout: {
-              ...get().shipsLayout,
-              [currentPlayerId]: playerLayout,
+          set(
+            {
+              shipsLayout: {
+                ...get().shipsLayout,
+                [currentPlayerId]: playerLayout,
+              },
+              occupiedCells: {
+                ...get().occupiedCells,
+                [currentPlayerId]: getOccupiedCells({}, playerLayout),
+              },
+              remainingShips: {
+                ...get().remainingShips,
+                [currentPlayerId]: setRemainingShips(fleetConfig, true),
+              },
             },
-            occupiedCells: {
-              ...get().occupiedCells,
-              [currentPlayerId]: getOccupiedCells({}, playerLayout),
-            },
-            remainingShips: {
-              ...get().remainingShips,
-              [currentPlayerId]: setRemainingShips(fleetConfig, true),
-            },
-          });
+            false,
+            "randomizeShipsLayout",
+          );
         },
 
         customizeShipsLayout: () => {
-          set({
-            shipsLayout: { ...get().shipsLayout, [currentPlayerId]: [] },
-            occupiedCells: {
-              ...get().occupiedCells,
-              [currentPlayerId]: {},
+          set(
+            {
+              shipsLayout: { ...get().shipsLayout, [currentPlayerId]: [] },
+              occupiedCells: {
+                ...get().occupiedCells,
+                [currentPlayerId]: {},
+              },
+              remainingShips: {
+                ...get().remainingShips,
+                [currentPlayerId]: setRemainingShips(fleetConfig),
+              },
             },
-            remainingShips: {
-              ...get().remainingShips,
-              [currentPlayerId]: setRemainingShips(fleetConfig),
-            },
-          });
+            false,
+            "customizeShipsLayout",
+          );
         },
 
         changeRemainingShipAmount: (playerId, shipVariant) => {
-          set({
-            remainingShips: {
-              ...get().remainingShips,
-              [playerId]: {
-                ...get().remainingShips[playerId],
-                [shipVariant]:
-                  get().remainingShips[playerId][shipVariant] - 1,
+          set(
+            {
+              remainingShips: {
+                ...get().remainingShips,
+                [playerId]: {
+                  ...get().remainingShips[playerId],
+                  [shipVariant]: get().remainingShips[playerId][shipVariant] - 1,
+                },
               },
             },
-          });
+            false,
+            "changeRemainingShipAmount",
+          );
         },
 
         shipPlacement: (coord, isPreview = false) => {
           if (!isPreview) get().setPreviewCells(null);
 
-          const { direction, shipVariant, indexCell, shipId, occupiedCells } =
+          const { direction } = get();
+          const { shipVariant, indexCell, shipId, occupiedCells } =
             get().dragInfo;
-          if (!coord || !direction || !shipVariant) {
-            return get().setDragInfo(true);
+          if (!coord || !shipVariant) {
+            return get().resetDragInfo();
           }
 
           const integerCoord: Coord = getIntegerCoordinate(coord);
@@ -197,7 +224,7 @@ export const usePlacementStore = create<PlacementStore>()(
             indexCell !== null ? indexCell : 0,
           );
 
-          if (points.length === 0 && !isPreview) return get().setDragInfo(true);
+          if (points.length === 0 && !isPreview) return get().resetDragInfo();
           if (points.length === 0 && isPreview) return;
 
           const oldPlayerLayout = get().shipsLayout[currentPlayerId];
@@ -206,7 +233,7 @@ export const usePlacementStore = create<PlacementStore>()(
           for (const point of points) {
             const stringPoint = getStringCoordinate(point);
             if (occupiedCells[stringPoint] !== undefined) {
-              if (!isPreview) return get().setDragInfo(true);
+              if (!isPreview) return get().resetDragInfo();
               return;
             }
           }
@@ -230,18 +257,22 @@ export const usePlacementStore = create<PlacementStore>()(
               ]
             : [...oldPlayerLayout, newShipPosition];
 
-          set({
-            shipsLayout: {
-              ...get().shipsLayout,
-              [currentPlayerId]: newPlayerLayout,
+          set(
+            {
+              shipsLayout: {
+                ...get().shipsLayout,
+                [currentPlayerId]: newPlayerLayout,
+              },
+              occupiedCells: {
+                ...get().occupiedCells,
+                [currentPlayerId]: getOccupiedCells({}, newPlayerLayout),
+              },
             },
-            occupiedCells: {
-              ...get().occupiedCells,
-              [currentPlayerId]: getOccupiedCells({}, newPlayerLayout),
-            },
-          });
+            false,
+            "shipPlacement",
+          );
 
-          get().setDragInfo(true);
+          get().resetDragInfo();
 
           if (!isPlacedShip) {
             get().changeRemainingShipAmount(currentPlayerId, shipVariant);
@@ -276,7 +307,7 @@ export const usePlacementStore = create<PlacementStore>()(
                 ])
               : get().occupiedCells[currentPlayerId];
 
-          get().setDragInfo(false, {
+          get().updateDragInfo({
             isDraggable: true,
             pos: { x, y },
             shipId: shipId ? Number(shipId) : null,
@@ -288,31 +319,16 @@ export const usePlacementStore = create<PlacementStore>()(
           });
         },
 
-        setDragInfo: (isReset = false, info = {}) => {
-          const initial = isReset
-            ? {
-                isDraggable: false,
-                pos: { x: 0, y: 0 },
-                shipId: null,
-                occupiedCells: {},
-                startPoint: null,
-                indexCell: 0,
-                shipVariant: null,
-                shipSize: 0,
-                cellSize: 0,
-                direction: get().dragInfo.direction || "h",
-              }
-            : {};
-          set({ dragInfo: { ...get().dragInfo, ...initial, ...info } });
+        resetDragInfo: () => {
+          set({ dragInfo: { ...initialDragInfo } }, false, "resetDragInfo");
+        },
+
+        updateDragInfo: (info) => {
+          set({ dragInfo: { ...get().dragInfo, ...info } }, false, "updateDragInfo");
         },
 
         switchDirection: () => {
-          set({
-            dragInfo: {
-              ...get().dragInfo,
-              direction: get().dragInfo.direction === "h" ? "v" : "h",
-            },
-          });
+          set({ direction: get().direction === "h" ? "v" : "h" }, false, "switchDirection");
         },
 
         setPreviewCells: (shipPosition) => {
@@ -326,7 +342,7 @@ export const usePlacementStore = create<PlacementStore>()(
               occupiedCellsPlacementPreview[getStringCoordinate(pos)] = "space";
             }
           }
-          set({ occupiedCellsPlacementPreview });
+          set({ occupiedCellsPlacementPreview }, false, "setPreviewCells");
         },
       };
     }),

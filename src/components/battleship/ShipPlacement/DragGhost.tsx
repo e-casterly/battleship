@@ -3,8 +3,9 @@ import { usePlacementStore } from "@store/placementStore.ts";
 import { useEffect, useMemo, useRef } from "react";
 
 export function DragGhost() {
-  const { isDraggable, direction, shipSize, indexCell, cellSize } =
+  const { isDraggable, shipSize, indexCell, cellSize } =
     usePlacementStore((s) => s.dragInfo);
+  const direction = usePlacementStore((s) => s.direction);
 
   const isHorizontal = direction === "h";
   const ghostRef = useRef<HTMLDivElement>(null);

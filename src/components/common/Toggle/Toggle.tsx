@@ -28,7 +28,7 @@ export function Toggle({
         {label && <div className="text-base font-decorative">{label}</div>}
         <div
           className={cn(
-            "inline-flex p-0.5 h-8 xl:h-10 border-stroke border bg-tone rounded-sm",
+            "inline-flex p-0.5 h-8 xl:h-10 border-stroke border bg-tone rounded-sm gap-1",
             className,
           )}
           role="group"
@@ -52,9 +52,9 @@ export function ToggleButton({ children, value }: ToggleButtonProps) {
       onClick={() => ctx?.onChange(value)}
       tabIndex={0}
       className={cn(
-        "[&:not(:last-child)]:-me-px px-2.5 text-foreground hover:bg-primary dark:hover:text-foreground-secondary text-base font-normal whitespace-nowrap cursor-pointer font-decorative border-2",
+        "not-last:-me-px px-2.5 text-foreground hover:bg-primary-hover dark:hover:text-foreground-secondary text-base font-normal whitespace-nowrap cursor-pointer font-decorative rounded-sm",
         {
-          "border-primary": selected,
+          "bg-primary dark:text-foreground-secondary": selected,
           "bg-transparent border-transparent": !selected,
         },
       )}
