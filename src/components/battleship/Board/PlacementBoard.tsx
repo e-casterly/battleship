@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useMemo } from "react";
-import { useGameStore } from "@store/gameStore.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
+import { BOARD_SIZE } from "@utils/constants.ts";
 import { getStringCoordinate } from "@utils/helpers.ts";
 import { BoardShell } from "@components/battleship/Board/BoardShell.tsx";
 import { PlacementCell } from "@components/battleship/Board/PlacementCell.tsx";
@@ -11,7 +11,7 @@ interface PlacementBoardProps {
 }
 
 export function PlacementBoard({ onPointerDown }: PlacementBoardProps) {
-  const [rows, cols] = useGameStore((s) => s.boardSize);
+  const [rows, cols] = BOARD_SIZE;
   const isDragging = usePlacementStore((s) => s.dragInfo.isDraggable);
 
   const cells = useMemo(() => {

@@ -5,15 +5,15 @@ import { BOARD_SIZE } from "@utils/constants.ts";
 import type { Coord } from "@utils/gameTypes.ts";
 
 interface AiState {
-  aiRemainingCoords: Set<string>;
-  aiFocusCoords: Coord[];
+  remainingCoords: Set<string>;
+  focusCoords: Coord[];
 }
 
 interface AiActions {
   resetAiState: () => void;
   setAiState: (state: {
-    aiRemainingCoords: Set<string>;
-    aiFocusCoords: Coord[];
+    remainingCoords: Set<string>;
+    focusCoords: Coord[];
   }) => void;
 }
 
@@ -22,12 +22,12 @@ type AiStore = AiState & AiActions;
 export const useAiStore = create<AiStore>()(
   devtools(
     (set) => ({
-      aiRemainingCoords: getFreeCoordsSet(BOARD_SIZE),
-      aiFocusCoords: [],
+      remainingCoords: getFreeCoordsSet(BOARD_SIZE),
+      focusCoords: [],
 
       resetAiState: () =>
         set(
-          { aiRemainingCoords: getFreeCoordsSet(BOARD_SIZE), aiFocusCoords: [] },
+          { remainingCoords: getFreeCoordsSet(BOARD_SIZE), focusCoords: [] },
           false,
           "resetAiState",
         ),

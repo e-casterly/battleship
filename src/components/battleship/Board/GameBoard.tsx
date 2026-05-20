@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useGameStore } from "@store/gameStore.ts";
+import { BOARD_SIZE } from "@utils/constants.ts";
 import { getStringCoordinate, titleOfCell } from "@utils/helpers.ts";
 import { BoardShell } from "@components/battleship/Board/BoardShell.tsx";
 import { BoardCell } from "@components/battleship/Board/BoardCell.tsx";
@@ -10,7 +11,7 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ ownerId }: GameBoardProps) {
-  const [rows, cols] = useGameStore((s) => s.boardSize);
+  const [rows, cols] = BOARD_SIZE;
   const turn = useGameStore((s) => s.turn);
   const isFocused = turn !== null && turn !== ownerId;
 

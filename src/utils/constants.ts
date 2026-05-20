@@ -11,6 +11,7 @@ export const FLEET_CONFIG: FleetConfig = {
 };
 
 export const PLAYERS_IDS = ["player", "computer"];
+export const CURRENT_PLAYER_ID = PLAYERS_IDS[0];
 
 export const HORIZONTAL_DIRS = [
   [0, 1],

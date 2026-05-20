@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { ShipType } from "@utils/gameTypes.ts";
-import { useGameStore } from "@store/gameStore.ts";
+import { FLEET_CONFIG } from "@utils/constants.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
 import cn from "clsx";
 import Icon from "@components/common/Icon/Icon.tsx";
@@ -14,7 +14,7 @@ interface ShipPaletteProps {
 }
 
 export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
-  const fleet = useGameStore((s) => s.fleetConfig);
+  const fleet = FLEET_CONFIG;
   const direction = usePlacementStore((s) => s.direction);
   const remainingShips = usePlacementStore((s) => s.remainingShips);
 

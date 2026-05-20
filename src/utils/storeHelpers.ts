@@ -18,31 +18,22 @@ export const getInitialPlayers = (playersIds: PlayerId[]) =>
 export const setDataForPlayers = <T>(
   playersIds: PlayerId[],
   data: T | (() => T),
-  currentPlayerId?: PlayerId,
-  dataForCurrentPlayer?: T,
 ) => {
   return Object.fromEntries(
     playersIds.map((id) => {
-      if (currentPlayerId && id === currentPlayerId) {
-        return [id, dataForCurrentPlayer as T];
-      }
       const value = typeof data === "function" ? (data as () => T)() : data;
       return [id, value];
     }),
   ) as Record<PlayerId, T>;
 };
 
-export const getOccupiedCells = (
-  initial: OccupiedCells,
-  addition: ShipItemPosition[],
-  startShipId: number = 0,
-): OccupiedCells => {
-  const occupied: OccupiedCells = { ...initial };
-  for (let i = 0; i < addition.length; i++) {
-    for (const pos of addition[i].positions) {
-      occupied[getStringCoordinate(pos)] = startShipId + i;
+export const getOccupiedCells = (layout: ShipItemPosition[]): OccupiedCells => {
+  const occupied: OccupiedCells = {};
+  for (let i = 0; i < layout.length; i++) {
+    for (const pos of layout[i].positions) {
+      occupied[getStringCoordinate(pos)] = i;
     }
-    for (const pos of addition[i].margins) {
+    for (const pos of layout[i].margins) {
       occupied[getStringCoordinate(pos)] = "space";
     }
   }
@@ -54,17 +45,22 @@ export const setOccupiedCellsForPlayers = (
   layouts: ShipsLayout,
 ) =>
   Object.fromEntries(
-    playersIds.map((id) => [id, getOccupiedCells({}, layouts[id])]),
+    playersIds.map((id) => [id, getOccupiedCells(layouts[id])]),
   );
 
-export const setRemainingShips = (
-  fleetConfig: FleetConfig,
-  empty?: boolean,
-) => {
+export const getFullRemainingShips = (fleetConfig: FleetConfig) => {
   const ships = {} as Record<ShipType, number>;
   for (const key in fleetConfig) {
     const ship = key as keyof FleetConfig;
-    ships[ship] = empty ? 0 : fleetConfig[ship as keyof FleetConfig]["count"];
+    ships[ship] = fleetConfig[ship].count;
+  }
+  return ships;
+};
+
+export const getEmptyRemainingShips = (fleetConfig: FleetConfig) => {
+  const ships = {} as Record<ShipType, number>;
+  for (const key in fleetConfig) {
+    ships[key as keyof FleetConfig] = 0;
   }
   return ships;
 };

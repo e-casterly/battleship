@@ -1,4 +1,5 @@
 import { useGameStore } from "@store/gameStore.ts";
+import { CURRENT_PLAYER_ID } from "@utils/constants.ts";
 import type { PlayerId } from "@utils/gameTypes.ts";
 import cn from 'clsx';
 import Icon from "@components/common/Icon/Icon.tsx";
@@ -21,8 +22,7 @@ export function BoardCell({
 
   const isShip = typeof occupiedCell === "number";
 
-  const currentPlayerId = useGameStore((s) => s.currentPlayerId);
-  const isPlayerBoard = currentPlayerId === ownerId;
+  const isPlayerBoard = CURRENT_PLAYER_ID === ownerId;
 
   const hitStatus =
     useGameStore((s) => s.hits?.[ownerId]?.[cellKey]) || undefined;
@@ -30,7 +30,7 @@ export function BoardCell({
   const isDisable =
     hitStatus !== undefined ||
     isPlayerBoard ||
-    turn !== currentPlayerId ||
+    turn !== CURRENT_PLAYER_ID ||
     !ownerId ||
     !cellKey;
 

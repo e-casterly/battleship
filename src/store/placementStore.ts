@@ -9,7 +9,8 @@ import {
 } from "@utils/helpers.ts";
 import {
   getOccupiedCells,
-  setRemainingShips,
+  getFullRemainingShips,
+  getEmptyRemainingShips,
 } from "@utils/storeHelpers.ts";
 import { generateShipPositions } from "@utils/generateShipPositions.ts";
 import type {
@@ -75,7 +76,7 @@ export const usePlacementStore = create<PlacementStore>()(
       direction: "h",
       layout: [],
       occupiedCells: {},
-      remainingShips: setRemainingShips(fleetConfig),
+      remainingShips: getFullRemainingShips(fleetConfig),
       occupiedCellsPlacementPreview: {},
       dragInfo: { ...initialDragInfo },
 
@@ -84,8 +85,8 @@ export const usePlacementStore = create<PlacementStore>()(
           {
             direction: "h",
             layout,
-            occupiedCells: getOccupiedCells({}, layout),
-            remainingShips: setRemainingShips(fleetConfig),
+            occupiedCells: getOccupiedCells(layout),
+            remainingShips: getFullRemainingShips(fleetConfig),
             occupiedCellsPlacementPreview: {},
             dragInfo: { ...initialDragInfo },
           },
@@ -96,7 +97,7 @@ export const usePlacementStore = create<PlacementStore>()(
 
       resetRemainingShips: () => {
         set(
-          { remainingShips: setRemainingShips(fleetConfig, true) },
+          { remainingShips: getEmptyRemainingShips(fleetConfig) },
           false,
           "resetRemainingShips",
         );
@@ -107,8 +108,8 @@ export const usePlacementStore = create<PlacementStore>()(
         set(
           {
             layout,
-            occupiedCells: getOccupiedCells({}, layout),
-            remainingShips: setRemainingShips(fleetConfig, true),
+            occupiedCells: getOccupiedCells(layout),
+            remainingShips: getEmptyRemainingShips(fleetConfig),
           },
           false,
           "randomizeShipsLayout",
@@ -120,7 +121,7 @@ export const usePlacementStore = create<PlacementStore>()(
           {
             layout: [],
             occupiedCells: {},
-            remainingShips: setRemainingShips(fleetConfig),
+            remainingShips: getFullRemainingShips(fleetConfig),
           },
           false,
           "customizeShipsLayout",
@@ -197,7 +198,7 @@ export const usePlacementStore = create<PlacementStore>()(
         set(
           {
             layout: newLayout,
-            occupiedCells: getOccupiedCells({}, newLayout),
+            occupiedCells: getOccupiedCells(newLayout),
           },
           false,
           "shipPlacement",
@@ -231,7 +232,7 @@ export const usePlacementStore = create<PlacementStore>()(
         const oldLayout = get().layout;
         const actualOccupiedCells =
           integerShipId !== null
-            ? getOccupiedCells({}, [
+            ? getOccupiedCells([
                 ...oldLayout.slice(0, integerShipId),
                 ...oldLayout.slice(integerShipId + 1),
               ])

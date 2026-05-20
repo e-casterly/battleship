@@ -1,20 +1,23 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { BOARD_SIZE, FLEET_CONFIG, PLAYERS_IDS } from "@utils/constants.ts";
+import {
+  BOARD_SIZE,
+  FLEET_CONFIG,
+  PLAYERS_IDS,
+  CURRENT_PLAYER_ID,
+} from "@utils/constants.ts";
 import {
   getInitialPlayers,
   setDataForPlayers,
   setFleetShots,
   setOccupiedCellsForPlayers,
-  setRemainingShips,
+  getFullRemainingShips,
 } from "@utils/storeHelpers.ts";
 import { getStringCoordinate, titleOfCell } from "@utils/helpers.ts";
 import { generateShipPositions } from "@utils/generateShipPositions.ts";
 import { getNextPoint } from "@utils/aiLogic.ts";
 import type {
-  BoardSize,
   CellStatus,
-  FleetConfig,
   FleetShots,
   Hits,
   OccupiedCells,
@@ -28,11 +31,7 @@ import { usePlacementStore } from "@store/placementStore.ts";
 import { useAiStore } from "@store/aiStore.ts";
 
 interface GameState {
-  boardSize: BoardSize;
-  fleetConfig: FleetConfig;
-  playersIds: PlayerId[];
   playersData: PlayerData[];
-  currentPlayerId: string;
   phase: Phase;
   turn: PlayerId | null;
   history: string[];
@@ -65,36 +64,34 @@ interface GameActions {
 
 type GameStore = GameState & GameActions;
 
-const boardSize = BOARD_SIZE;
-const fleetConfig = FLEET_CONFIG;
-const playersIds = PLAYERS_IDS;
-const currentPlayerId = playersIds[0];
+const getEmptyGameplayState = () => ({
+  phase: "placement" as Phase,
+  turn: null as PlayerId | null,
+  hits: setDataForPlayers(PLAYERS_IDS, {}),
+  fleetShots: setDataForPlayers(PLAYERS_IDS, {}),
+  shipsLayout: setDataForPlayers(PLAYERS_IDS, [] as never),
+  occupiedCells: setDataForPlayers(PLAYERS_IDS, {} as OccupiedCells),
+  remainingShips: setDataForPlayers(
+    PLAYERS_IDS,
+    {} as Record<ShipType, number>,
+  ),
+  history: [] as string[],
+  move: 0,
+});
 
 export const useGameStore = create<GameStore>()(
   devtools(
     (set, get) => ({
-      boardSize,
-      fleetConfig,
-      playersIds,
-      playersData: getInitialPlayers(playersIds),
-      currentPlayerId,
-      phase: "placement",
-      turn: null,
-      history: [],
-      move: 0,
-      hits: setDataForPlayers(playersIds, {}),
-      fleetShots: setDataForPlayers(playersIds, {}),
-      shipsLayout: setDataForPlayers(playersIds, [] as never),
-      occupiedCells: setDataForPlayers(playersIds, {} as OccupiedCells),
-      remainingShips: setDataForPlayers(playersIds, {} as Record<ShipType, number>),
+      playersData: getInitialPlayers(PLAYERS_IDS),
+      ...getEmptyGameplayState(),
 
       switchTurn: () => {
         const currentTurn = get().turn;
-        const [player1, player2] = get().playersIds;
+        const [player1, player2] = PLAYERS_IDS;
         const nextTurn = currentTurn === player1 ? player2 : player1;
         set({ turn: nextTurn, move: get().move + 1 }, false, "switchTurn");
         get().setHistory("turn", {});
-        if (nextTurn !== currentPlayerId) {
+        if (nextTurn !== CURRENT_PLAYER_ID) {
           setTimeout(() => get().computerMove(), 600);
         }
       },
@@ -117,18 +114,21 @@ export const useGameStore = create<GameStore>()(
 
       startGame: () => {
         const { layout } = usePlacementStore.getState();
-        const aiLayout = generateShipPositions(boardSize, fleetConfig);
+        const aiLayout = generateShipPositions(BOARD_SIZE, FLEET_CONFIG);
         const shipsLayout: ShipsLayout = {
-          [currentPlayerId]: layout,
-          [playersIds[1]]: aiLayout,
+          [CURRENT_PLAYER_ID]: layout,
+          [PLAYERS_IDS[1]]: aiLayout,
         };
         set(
           {
             phase: "in-game",
             shipsLayout,
-            occupiedCells: setOccupiedCellsForPlayers(playersIds, shipsLayout),
-            remainingShips: setDataForPlayers(playersIds, setRemainingShips(fleetConfig)),
-            fleetShots: setFleetShots(get().playersIds, shipsLayout),
+            occupiedCells: setOccupiedCellsForPlayers(PLAYERS_IDS, shipsLayout),
+            remainingShips: setDataForPlayers(
+              PLAYERS_IDS,
+              getFullRemainingShips(FLEET_CONFIG),
+            ),
+            fleetShots: setFleetShots(PLAYERS_IDS, shipsLayout),
           },
           false,
           "startGame",
@@ -140,41 +140,13 @@ export const useGameStore = create<GameStore>()(
       startNewGame: () => {
         usePlacementStore.getState().resetPlacementState([]);
         useAiStore.getState().resetAiState();
-        set(
-          {
-            phase: "placement",
-            turn: null,
-            hits: setDataForPlayers(get().playersIds, {}),
-            fleetShots: setDataForPlayers(get().playersIds, {}),
-            shipsLayout: setDataForPlayers(playersIds, [] as never),
-            occupiedCells: setDataForPlayers(playersIds, {} as OccupiedCells),
-            remainingShips: setDataForPlayers(playersIds, {} as Record<ShipType, number>),
-            history: [],
-            move: 0,
-          },
-          false,
-          "startNewGame",
-        );
+        set(getEmptyGameplayState(), false, "startNewGame");
       },
 
       resetSameGame: () => {
         usePlacementStore.getState().resetRemainingShips();
         useAiStore.getState().resetAiState();
-        set(
-          {
-            phase: "placement",
-            turn: null,
-            hits: setDataForPlayers(get().playersIds, {}),
-            fleetShots: setDataForPlayers(get().playersIds, {}),
-            shipsLayout: setDataForPlayers(playersIds, [] as never),
-            occupiedCells: setDataForPlayers(playersIds, {} as OccupiedCells),
-            remainingShips: setDataForPlayers(playersIds, {} as Record<ShipType, number>),
-            history: [],
-            move: 0,
-          },
-          false,
-          "resetSameGame",
-        );
+        set(getEmptyGameplayState(), false, "resetSameGame");
       },
 
       fire: (defenderId, cellKey) => {
@@ -237,46 +209,49 @@ export const useGameStore = create<GameStore>()(
       playerMove: (defenderId, cellKey) => {
         if (
           get().hits[defenderId][cellKey] ||
-          get().turn !== currentPlayerId
+          get().turn !== CURRENT_PLAYER_ID
         )
           return;
         const { result, shipType } = get().fire(defenderId, cellKey);
         get().setHistory(result, { cellKey, shipType });
-        if (result === "miss") get().switchTurn();
-        get().checkWinner(defenderId);
+        if (result === "miss") {
+          get().switchTurn();
+        } else {
+          get().checkWinner(defenderId);
+        }
       },
 
       computerMove: () => {
-        const { aiRemainingCoords, aiFocusCoords } = useAiStore.getState();
-        const defenderId = currentPlayerId;
-        const nextPoint = getNextPoint(aiRemainingCoords, aiFocusCoords);
+        const { remainingCoords, focusCoords } = useAiStore.getState();
+        const nextPoint = getNextPoint(remainingCoords, focusCoords);
         if (!nextPoint) return get().switchTurn();
 
         const cellKey = getStringCoordinate(nextPoint);
         const { result, excludedCoords, shipType } = get().fire(
-          defenderId,
+          CURRENT_PLAYER_ID,
           cellKey,
         );
 
-        for (const coord of excludedCoords) aiRemainingCoords.delete(coord);
+        const newRemainingCoords = new Set(remainingCoords);
+        for (const coord of excludedCoords) newRemainingCoords.delete(coord);
 
-        let newAiFocusCoords = [...aiFocusCoords];
+        let newFocusCoords = [...focusCoords];
         if (result === "hit") {
-          newAiFocusCoords = [...newAiFocusCoords, nextPoint];
+          newFocusCoords = [...newFocusCoords, nextPoint];
         } else if (result === "sunk") {
-          newAiFocusCoords = [];
+          newFocusCoords = [];
         }
 
         useAiStore.getState().setAiState({
-          aiRemainingCoords: new Set(aiRemainingCoords),
-          aiFocusCoords: newAiFocusCoords,
+          remainingCoords: newRemainingCoords,
+          focusCoords: newFocusCoords,
         });
 
         get().setHistory(result, { cellKey, shipType });
         if (result === "miss") {
           get().switchTurn();
         } else {
-          const winner = get().checkWinner(defenderId);
+          const winner = get().checkWinner(CURRENT_PLAYER_ID);
           if (!winner) setTimeout(() => get().computerMove(), 500);
         }
       },

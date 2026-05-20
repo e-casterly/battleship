@@ -1,6 +1,6 @@
 import Ship from "@components/battleship/Ship/Ship.tsx";
 import { GameBoard } from "@components/battleship/Board/GameBoard.tsx";
-import { useGameStore } from "@store/gameStore.ts";
+import { FLEET_CONFIG, CURRENT_PLAYER_ID } from "@utils/constants.ts";
 import type { PlayerData, ShipType } from "@utils/gameTypes.ts";
 import cn from 'clsx';
 
@@ -10,8 +10,8 @@ interface PlayerPartProps {
 }
 
 export function PlayerPart({ id }: PlayerPartProps) {
-  const isPlayer = useGameStore((s) => s.currentPlayerId === id);
-  const fleet = useGameStore((s) => s.fleetConfig);
+  const isPlayer = CURRENT_PLAYER_ID === id;
+  const fleet = FLEET_CONFIG;
 
   const maxShips = Object.values(fleet).reduce(
     (acc, curr) => acc + curr.count,
