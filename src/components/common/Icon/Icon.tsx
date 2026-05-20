@@ -1,53 +1,47 @@
-import * as React from "react";
-import CloseIcon from "@assets/close.svg?react";
-import CircleIcon from "@assets/circle.svg?react";
-import SchoonerIcon from "@assets/schooner.svg?react";
-import SloopIcon from "@assets/sloop.svg?react";
+import type { FC, SVGProps } from "react";
+import ArrowIcon from "@assets/arrow.svg?react";
 import BrigantineIcon from "@assets/brigantine.svg?react";
-import GalleonIcon from "@assets/galleon.svg?react";
-import FrigateIcon from "@assets/frigate.svg?react";
-import MenuIcon from "@assets/menu.svg?react";
+import CircleIcon from "@assets/circle.svg?react";
+import CloseIcon from "@assets/close.svg?react";
 import CubeIcon from "@assets/cube.svg?react";
+import FrigateIcon from "@assets/frigate.svg?react";
+import GalleonIcon from "@assets/galleon.svg?react";
 import HandIcon from "@assets/hand.svg?react";
 import HorizontalIcon from "@assets/horizontal.svg?react";
+import MenuIcon from "@assets/menu.svg?react";
+import SchoonerIcon from "@assets/schooner.svg?react";
+import SloopIcon from "@assets/sloop.svg?react";
 import VerticalIcon from "@assets/vertical.svg?react";
-import ArrowIcon from "@assets/arrow.svg?react";
-import cn from 'clsx';
+import cn from "clsx";
 
 const ICONS = {
-  menu: MenuIcon,
-  close: CloseIcon,
-  circle: CircleIcon,
-  schooner: SchoonerIcon,
-  sloop: SloopIcon,
-  galleon: GalleonIcon,
-  frigate: FrigateIcon,
+  arrow: ArrowIcon,
   brigantine: BrigantineIcon,
+  circle: CircleIcon,
+  close: CloseIcon,
   cube: CubeIcon,
+  frigate: FrigateIcon,
+  galleon: GalleonIcon,
   hand: HandIcon,
   horizontal: HorizontalIcon,
+  menu: MenuIcon,
+  schooner: SchoonerIcon,
+  sloop: SloopIcon,
   vertical: VerticalIcon,
-  arrow: ArrowIcon,
-};
+} satisfies Record<string, FC<SVGProps<SVGSVGElement>>>;
 
-type IconName = keyof typeof ICONS;
+export type IconName = keyof typeof ICONS;
 
-export type IconProps = Omit<
-  React.SVGProps<SVGSVGElement>,
-  "width" | "height" | "color"
-> & {
-  name?: IconName;
-  size?: "auto" | "base";
+type IconSize = "auto" | "base";
+
+export type IconProps = Omit<SVGProps<SVGSVGElement>, "width" | "height" | "color"> & {
+  name: IconName;
+  size?: IconSize;
   className?: string;
 };
 
-export default function Icon({
-  name = "circle",
-  size = "base",
-  className,
-  ...rest
-}: IconProps) {
-  const SvgIcon = ICONS[name] satisfies React.FC<React.SVGProps<SVGSVGElement>>;
+export default function Icon({ name, size = "base", className, ...rest }: IconProps) {
+  const SvgIcon = ICONS[name];
 
   return (
     <SvgIcon

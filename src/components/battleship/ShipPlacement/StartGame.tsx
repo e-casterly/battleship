@@ -9,7 +9,7 @@ export function StartGame() {
   const isReady = Object.values(remainingShips).every((count) => count === 0);
   return (
     <div className="flex justify-center">
-      <Button onClick={startGame} isDisable={!isReady} size="large">
+      <Button onClick={startGame} disabled={!isReady} size="large">
         Start game
       </Button>
     </div>

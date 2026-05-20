@@ -1,5 +1,5 @@
 import { createContext, type PropsWithChildren, use } from "react";
-import cn from 'clsx';
+import cn from "clsx";
 
 type ToggleContext = {
   value: string;
@@ -32,6 +32,7 @@ export function Toggle({
             className,
           )}
           role="group"
+          aria-label={label}
         >
           {children}
         </div>
@@ -46,11 +47,11 @@ interface ToggleButtonProps extends PropsWithChildren {
 
 export function ToggleButton({ children, value }: ToggleButtonProps) {
   const ctx = use(ToggleCtx);
-  const selected = ctx?.value === value;
+  if (!ctx) throw new Error("ToggleButton must be used inside Toggle");
+  const selected = ctx.value === value;
   return (
     <button
-      onClick={() => ctx?.onChange(value)}
-      tabIndex={0}
+      onClick={() => ctx.onChange(value)}
       className={cn(
         "not-last:-me-px px-2.5 text-foreground hover:bg-primary-hover dark:hover:text-foreground-secondary text-base font-normal whitespace-nowrap cursor-pointer font-decorative rounded-sm",
         {

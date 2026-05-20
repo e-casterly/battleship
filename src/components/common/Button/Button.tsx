@@ -1,32 +1,23 @@
-import * as React from "react";
-import cn from 'clsx';
+import cn from "clsx";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-  onClick?: () => void;
-  className?: string;
-  color?: "primary";
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
   variant?: "contained" | "clean" | "text";
   size?: "base" | "large";
-  isDisable?: boolean;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
 
 export default function Button({
   children,
-  onClick,
-  className,
-  color = "primary",
   variant = "contained",
   size = "base",
-  isDisable,
   icon,
+  className,
   ...rest
 }: ButtonProps) {
   return (
     <button
-      onClick={onClick}
-      disabled={isDisable}
       className={cn(
         "inline-flex gap-x-0.5 items-center justify-center whitespace-nowrap",
         "font-decorative",
@@ -48,7 +39,7 @@ export default function Button({
         },
         {
           "uppercase bg-primary text-primary-contrast hover:bg-primary-hover":
-            variant === "contained" && color === "primary",
+            variant === "contained",
         },
         { "bg-transparent hover:text-primary-hover": variant === "clean" },
         className,
