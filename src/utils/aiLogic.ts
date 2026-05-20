@@ -2,6 +2,7 @@ import type { Coord } from "@utils/gameTypes.ts";
 import {
   checkIsHorizontal,
   getFreePointFromSet,
+  getIntegerCoordinate,
   getStringCoordinate,
   isPointInsideOfBoard,
   shuffleDirs,
@@ -20,11 +21,20 @@ const getSidePoints = (coords: Coord[]) => {
   if (coords.length > 1) {
     const isHorizontal = checkIsHorizontal(coords);
     const sortedCoords = isHorizontal
-      ? coords.sort((a, b) => a[1] - b[1])
-      : coords.sort((a, b) => a[0] - b[0]);
+      ? [...coords].sort((a, b) => a[1] - b[1])
+      : [...coords].sort((a, b) => a[0] - b[0]);
     return [sortedCoords[0], sortedCoords[sortedCoords.length - 1]];
   }
   return coords;
+};
+
+const getCheckerboardCoords = (remainingCoords: Set<string>): Set<string> => {
+  const checkerboard = new Set<string>();
+  for (const coord of remainingCoords) {
+    const [r, c] = getIntegerCoordinate(coord);
+    if ((r + c) % 2 === 0) checkerboard.add(coord);
+  }
+  return checkerboard.size > 0 ? checkerboard : remainingCoords;
 };
 
 export const getNextPoint = (
@@ -47,5 +57,5 @@ export const getNextPoint = (
       }
     }
   }
-  return getFreePointFromSet(remainingCoords);
+  return getFreePointFromSet(getCheckerboardCoords(remainingCoords));
 };
