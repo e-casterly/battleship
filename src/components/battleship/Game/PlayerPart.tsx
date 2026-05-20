@@ -1,5 +1,5 @@
 import Ship from "@components/battleship/Ship/Ship.tsx";
-import Board from "@components/battleship/Board/Board.tsx";
+import { GameBoard } from "@components/battleship/Board/GameBoard.tsx";
 import { useGameStore } from "@store/gameStore.ts";
 import type { PlayerData, ShipType } from "@utils/gameTypes.ts";
 import cn from 'clsx';
@@ -35,7 +35,7 @@ export function PlayerPart({ id }: PlayerPartProps) {
           ))}
         </div>
         <div className="flex-none inline-flex">
-          <Board ownerId={id} />
+          <GameBoard ownerId={id} />
         </div>
       </div>
     </div>

@@ -3,7 +3,6 @@ import type { ShipType } from "@utils/gameTypes.ts";
 import { useGameStore } from "@store/gameStore.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
 import cn from "clsx";
-import { PlacementCellView } from "@components/battleship/Board/PlacementCellView.tsx";
 import Icon from "@components/common/Icon/Icon.tsx";
 
 interface ShipPaletteProps {
@@ -85,12 +84,12 @@ function ShipItem({ size, isActive, onPointerDown, direction }: ShipItemProps) {
       })}
     >
       {Array.from({ length: size }).map((_, indexSize) => (
-        <PlacementCellView
+        <div
           key={indexSize}
-          isActiveShip={isActive}
-          onPointerDown={(e) =>
-            isActive ? onPointerDown(e, indexSize) : undefined
-          }
+          className={cn("cell-size border border-stroke touch-none", {
+            "cursor-pointer bg-primary": isActive,
+          })}
+          onPointerDown={(e) => (isActive ? onPointerDown(e, indexSize) : undefined)}
         />
       ))}
     </div>

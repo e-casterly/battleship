@@ -1,13 +1,10 @@
-import Board from "@components/battleship/Board/Board.tsx";
-import { useGameStore } from "@store/gameStore.ts";
+import { PlacementBoard } from "@components/battleship/Board/PlacementBoard.tsx";
 import { DragGhost } from "@components/battleship/ShipPlacement/DragGhost.tsx";
 import { PlacementPanel } from "@components/battleship/ShipPlacement/PlacementPanel.tsx";
 import { useDragHandlers } from "@components/battleship/ShipPlacement/useDragHandlers.ts";
 import { StartGame } from "@components/battleship/ShipPlacement/StartGame.tsx";
 
 export function ShipPlacement() {
-  const currentPlayerId = useGameStore((s) => s.currentPlayerId);
-
   const { onPointerDown } = useDragHandlers();
 
   return (
@@ -19,7 +16,7 @@ export function ShipPlacement() {
       <div className="grid grid-cols-12 gap-4 lg:gap-12">
         <PlacementPanel onPointerDown={onPointerDown} />
         <div className="col-span-12 lg:col-span-6 justify-self-center lg:justify-self-start">
-          <Board ownerId={currentPlayerId} onPointerDown={onPointerDown} />
+          <PlacementBoard onPointerDown={onPointerDown} />
         </div>
       </div>
       <DragGhost />

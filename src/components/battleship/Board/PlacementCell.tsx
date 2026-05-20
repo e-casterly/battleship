@@ -1,31 +1,37 @@
-import { usePlacementStore } from "@store/placementStore.ts";
 import * as React from "react";
-import { PlacementCellView } from "@components/battleship/Board/PlacementCellView.tsx";
+import { usePlacementStore } from "@store/placementStore.ts";
+import cn from "clsx";
 
 interface PlacementCellProps {
-  isActive?: boolean;
   cellKey: string;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
-export function PlacementCell({
-  cellKey,
-  onPointerDown,
-}: PlacementCellProps) {
+export function PlacementCell({ cellKey, onPointerDown }: PlacementCellProps) {
   const occupiedCell = usePlacementStore((s) => s.occupiedCells?.[cellKey]);
-  const preview = usePlacementStore(
-    (s) => s.occupiedCellsPlacementPreview?.[cellKey],
-  );
+  const preview = usePlacementStore((s) => s.occupiedCellsPlacementPreview?.[cellKey]);
 
   const isShip = typeof occupiedCell === "number";
+
   return (
-    <PlacementCellView
-      cellKey={cellKey}
+    <div
+      className={cn(
+        "cell-size border border-stroke touch-none focus-visible:outline-none flex justify-center items-center",
+        { "cursor-pointer bg-primary": isShip },
+        { "bg-primary/40": preview === "ship" && !isShip },
+      )}
+      data-coord={cellKey}
+      data-ship={isShip ? occupiedCell : undefined}
       onPointerDown={onPointerDown}
-      isActiveShip={isShip}
-      isSpace={occupiedCell === "space"}
-      shipId={isShip ? occupiedCell : undefined}
-      preview={preview}
-    />
+    >
+      {(occupiedCell === "space" || preview === "space") && (
+        <div
+          className={cn("h-2 w-2 rounded-full", {
+            "bg-note": occupiedCell === "space",
+            "bg-note/40": preview === "space",
+          })}
+        />
+      )}
+    </div>
   );
 }
