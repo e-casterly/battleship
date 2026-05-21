@@ -16,7 +16,8 @@ interface ShipPaletteProps {
 export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
   const fleet = FLEET_CONFIG;
   const direction = usePlacementStore((s) => s.direction);
-  const remainingShips = usePlacementStore((s) => s.remainingShips);
+  const layout = usePlacementStore((s) => s.layout);
+  const removeShip = usePlacementStore((s) => s.removeShip);
 
   return (
     <div
@@ -27,7 +28,7 @@ export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
     >
       {(Object.keys(fleet) as ShipType[]).map((variant) => {
         const { size, count } = fleet[variant];
-        const remaining = remainingShips[variant];
+        const remaining = count - layout.filter((s) => s.type === variant).length;
         return (
           <div
             key={variant}
@@ -49,17 +50,23 @@ export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
               </div>
             </div>
             <div className="flex-1 flex gap-2">
-              {Array.from({ length: count }).map((_, indexCount) => (
-                <ShipItem
-                  key={indexCount}
-                  direction={direction}
-                  size={size}
-                  isActive={remaining === indexCount + 1}
-                  onPointerDown={(e, indexCell) =>
-                    onPointerDown(e, variant, indexCell)
-                  }
-                />
-              ))}
+              {Array.from({ length: count }).map((_, i) => {
+                const shipId = `${variant}-${i}`;
+                const isPlaced = layout.some((s) => s.id === shipId);
+                return (
+                  <ShipItem
+                    key={shipId}
+                    shipId={shipId}
+                    direction={direction}
+                    size={size}
+                    isPlaced={isPlaced}
+                    onPointerDown={(e, indexCell) =>
+                      onPointerDown(e, variant, indexCell)
+                    }
+                    onRemove={() => removeShip(shipId)}
+                  />
+                );
+              })}
             </div>
           </div>
         );
@@ -69,27 +76,32 @@ export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
 }
 
 interface ShipItemProps {
+  shipId: string;
   direction: "h" | "v";
   size: number;
-  isActive: boolean;
+  isPlaced: boolean;
   onPointerDown: (e: React.PointerEvent<HTMLDivElement>, index: number) => void;
+  onRemove: () => void;
 }
 
-function ShipItem({ size, isActive, onPointerDown, direction }: ShipItemProps) {
+function ShipItem({ shipId, size, isPlaced, onPointerDown, onRemove, direction }: ShipItemProps) {
   return (
     <div
       className={cn("flex border border-stroke", {
         "flex-col": direction === "v",
-        "hover:shadow-base": isActive,
+        "hover:shadow-base": !isPlaced,
+        "opacity-40 cursor-pointer": isPlaced,
       })}
+      onClick={isPlaced ? onRemove : undefined}
     >
       {Array.from({ length: size }).map((_, indexSize) => (
         <div
           key={indexSize}
+          data-ship={!isPlaced ? shipId : undefined}
           className={cn("cell-size border border-stroke touch-none", {
-            "cursor-pointer bg-primary": isActive,
+            "cursor-pointer bg-primary": !isPlaced,
           })}
-          onPointerDown={(e) => (isActive ? onPointerDown(e, indexSize) : undefined)}
+          onPointerDown={(e) => (!isPlaced ? onPointerDown(e, indexSize) : undefined)}
         />
       ))}
     </div>

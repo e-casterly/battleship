@@ -1,12 +1,12 @@
 import Button from "@components/common/Button/Button.tsx";
 import { useGameStore } from "@store/gameStore.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
-
+import { TOTAL_SHIPS } from "@utils/constants.ts";
 
 export function StartGame() {
   const startGame = useGameStore((s) => s.startGame);
-  const remainingShips = usePlacementStore((s) => s.remainingShips);
-  const isReady = Object.values(remainingShips).every((count) => count === 0);
+  const layout = usePlacementStore((s) => s.layout);
+  const isReady = layout.length === TOTAL_SHIPS;
   return (
     <div className="flex justify-center">
       <Button onClick={startGame} disabled={!isReady} size="large">

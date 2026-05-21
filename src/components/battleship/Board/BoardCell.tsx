@@ -20,7 +20,7 @@ export function BoardCell({
 
   const occupiedCell = useGameStore((s) => s.occupiedCells?.[ownerId]?.[cellKey]);
 
-  const isShip = typeof occupiedCell === "number";
+  const isShip = occupiedCell !== undefined && occupiedCell !== "space";
 
   const isPlayerBoard = CURRENT_PLAYER_ID === ownerId;
 

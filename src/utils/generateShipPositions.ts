@@ -96,6 +96,7 @@ export function generateShipPositions(
         freeCoords = new Set(shipData.updatedFreeCoordsSet);
         const { positions, margins } = shipData;
         shipPositions.push({
+          id: `${currentShip}-${i}`,
           positions,
           margins,
           type: currentShip,
@@ -107,9 +108,13 @@ export function generateShipPositions(
 
   const result: Partial<ShipItemPosition[]> | null = getShipsData(0);
   if (!result) {
-    return layoutPresets[
-      Math.floor(Math.random() * layoutPresets.length)
-    ] as ShipItemPosition[];
+    const preset = layoutPresets[Math.floor(Math.random() * layoutPresets.length)];
+    const typeCounts: Record<string, number> = {};
+    return (preset as Omit<ShipItemPosition, "id">[]).map((s) => {
+      typeCounts[s.type] = typeCounts[s.type] ?? 0;
+      const id = `${s.type}-${typeCounts[s.type]++}`;
+      return { ...s, id };
+    });
   }
   return result as ShipItemPosition[];
 }

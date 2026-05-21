@@ -141,7 +141,6 @@ export const useGameStore = create<GameStore>()(
       },
 
       resetSameGame: () => {
-        usePlacementStore.getState().resetRemainingShips();
         useAiStore.getState().resetAiState();
         set(getEmptyGameplayState(), false, "resetSameGame");
       },
@@ -150,7 +149,7 @@ export const useGameStore = create<GameStore>()(
         const state = get();
         const shipId = state.occupiedCells[defenderId]?.[cellKey];
 
-        if (shipId !== undefined && typeof shipId === "number") {
+        if (shipId !== undefined && shipId !== "space") {
           const newHitsAmount = state.fleetShots[defenderId][shipId] - 1;
           const isSunk = newHitsAmount === 0;
 
@@ -167,12 +166,15 @@ export const useGameStore = create<GameStore>()(
           };
 
           if (isSunk) {
-            const shipType = state.shipsLayout[defenderId][shipId].type;
-            const shipCells = state.shipsLayout[defenderId][shipId].positions.map(
-              (item) => getStringCoordinate(item),
+            const ship = state.shipsLayout[defenderId].find(
+              (s) => s.id === shipId,
+            )!;
+            const shipType = ship.type;
+            const shipCells = ship.positions.map((item) =>
+              getStringCoordinate(item),
             );
-            const marginCells = state.shipsLayout[defenderId][shipId].margins.map(
-              (item) => getStringCoordinate(item),
+            const marginCells = ship.margins.map((item) =>
+              getStringCoordinate(item),
             );
             for (const pos of shipCells) hits[defenderId][pos] = "sunk";
             for (const pos of marginCells) hits[defenderId][pos] = "miss";

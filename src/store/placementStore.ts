@@ -7,11 +7,7 @@ import {
   getMargins,
   getStringCoordinate,
 } from "@utils/helpers.ts";
-import {
-  getOccupiedCells,
-  getFullRemainingShips,
-  getEmptyRemainingShips,
-} from "@utils/storeHelpers.ts";
+import { getOccupiedCells } from "@utils/storeHelpers.ts";
 import { generateShipPositions } from "@utils/generateShipPositions.ts";
 import type {
   Coord,
@@ -26,17 +22,15 @@ interface PlacementState {
   direction: "h" | "v";
   layout: ShipItemPosition[];
   occupiedCells: OccupiedCells;
-  remainingShips: Record<ShipType, number>;
   occupiedCellsPlacementPreview: OccupiedCellsPlacementPreview;
   dragInfo: DragInfo;
 }
 
 interface PlacementActions {
   resetPlacementState: (layout: ShipItemPosition[]) => void;
-  resetRemainingShips: () => void;
   randomizeShipsLayout: () => void;
   customizeShipsLayout: () => void;
-  changeRemainingShipAmount: (shipVariant: ShipType) => void;
+  removeShip: (shipId: string) => void;
   shipPlacement: (coord: string | null, isPreview?: boolean) => void;
   onStartDragging: (params: {
     variant: ShipType | undefined;
@@ -76,7 +70,6 @@ export const usePlacementStore = create<PlacementStore>()(
       direction: "h",
       layout: [],
       occupiedCells: {},
-      remainingShips: getFullRemainingShips(fleetConfig),
       occupiedCellsPlacementPreview: {},
       dragInfo: { ...initialDragInfo },
 
@@ -86,20 +79,11 @@ export const usePlacementStore = create<PlacementStore>()(
             direction: "h",
             layout,
             occupiedCells: getOccupiedCells(layout),
-            remainingShips: getFullRemainingShips(fleetConfig),
             occupiedCellsPlacementPreview: {},
             dragInfo: { ...initialDragInfo },
           },
           false,
           "resetPlacementState",
-        );
-      },
-
-      resetRemainingShips: () => {
-        set(
-          { remainingShips: getEmptyRemainingShips(fleetConfig) },
-          false,
-          "resetRemainingShips",
         );
       },
 
@@ -109,7 +93,6 @@ export const usePlacementStore = create<PlacementStore>()(
           {
             layout,
             occupiedCells: getOccupiedCells(layout),
-            remainingShips: getEmptyRemainingShips(fleetConfig),
           },
           false,
           "randomizeShipsLayout",
@@ -118,26 +101,21 @@ export const usePlacementStore = create<PlacementStore>()(
 
       customizeShipsLayout: () => {
         set(
-          {
-            layout: [],
-            occupiedCells: {},
-            remainingShips: getFullRemainingShips(fleetConfig),
-          },
+          { layout: [], occupiedCells: {} },
           false,
           "customizeShipsLayout",
         );
       },
 
-      changeRemainingShipAmount: (shipVariant) => {
+      removeShip: (shipId) => {
+        const newLayout = get().layout.filter((s) => s.id !== shipId);
         set(
           {
-            remainingShips: {
-              ...get().remainingShips,
-              [shipVariant]: get().remainingShips[shipVariant] - 1,
-            },
+            layout: newLayout,
+            occupiedCells: getOccupiedCells(newLayout),
           },
           false,
-          "changeRemainingShipAmount",
+          "removeShip",
         );
       },
 
@@ -166,7 +144,9 @@ export const usePlacementStore = create<PlacementStore>()(
         if (points.length === 0 && isPreview) return;
 
         const oldLayout = get().layout;
-        const isPlacedShip = shipId !== null && oldLayout[shipId];
+        const layoutIdx =
+          shipId !== null ? oldLayout.findIndex((s) => s.id === shipId) : -1;
+        const isPlacedShip = layoutIdx >= 0;
 
         for (const point of points) {
           const stringPoint = getStringCoordinate(point);
@@ -177,7 +157,11 @@ export const usePlacementStore = create<PlacementStore>()(
         }
 
         const margins = getMargins(boardSize, points);
+        const newId = isPlacedShip
+          ? shipId!
+          : (shipId ?? `${shipVariant}-${get().layout.filter((s) => s.type === shipVariant).length}`);
         const newShipPosition: ShipItemPosition = {
+          id: newId,
           margins,
           positions: points,
           type: shipVariant,
@@ -189,9 +173,9 @@ export const usePlacementStore = create<PlacementStore>()(
 
         const newLayout = isPlacedShip
           ? [
-              ...oldLayout.slice(0, shipId),
+              ...oldLayout.slice(0, layoutIdx),
               newShipPosition,
-              ...oldLayout.slice(shipId + 1),
+              ...oldLayout.slice(layoutIdx + 1),
             ]
           : [...oldLayout, newShipPosition];
 
@@ -205,43 +189,43 @@ export const usePlacementStore = create<PlacementStore>()(
         );
 
         get().resetDragInfo();
-
-        if (!isPlacedShip) {
-          get().changeRemainingShipAmount(shipVariant);
-        }
       },
 
       onStartDragging: ({ variant, index, shipId, coord, x, y, cellSize }) => {
         let shipVariant = variant;
         let indexCell = index;
-        const integerShipId =
-          shipId && !Number.isNaN(Number(shipId)) ? Number(shipId) : null;
 
-        if (integerShipId !== null) {
-          const layoutInfo = get().layout[integerShipId];
-          if (!layoutInfo || !coord) return;
+        const oldLayout = get().layout;
+        const layoutIdx = shipId
+          ? oldLayout.findIndex((s) => s.id === shipId)
+          : -1;
+
+        if (layoutIdx >= 0) {
+          const layoutInfo = oldLayout[layoutIdx];
+          if (!layoutInfo) return;
           shipVariant = layoutInfo.type;
-          const integerCoord = getIntegerCoordinate(coord);
-          indexCell = layoutInfo.positions.findIndex(
-            (item) =>
-              item[0] === integerCoord[0] && item[1] === integerCoord[1],
-          );
+          if (coord) {
+            const integerCoord = getIntegerCoordinate(coord);
+            indexCell = layoutInfo.positions.findIndex(
+              (item) =>
+                item[0] === integerCoord[0] && item[1] === integerCoord[1],
+            );
+          }
         }
         if (!shipVariant || indexCell === undefined) return;
 
-        const oldLayout = get().layout;
         const actualOccupiedCells =
-          integerShipId !== null
+          layoutIdx >= 0
             ? getOccupiedCells([
-                ...oldLayout.slice(0, integerShipId),
-                ...oldLayout.slice(integerShipId + 1),
+                ...oldLayout.slice(0, layoutIdx),
+                ...oldLayout.slice(layoutIdx + 1),
               ])
             : get().occupiedCells;
 
         get().updateDragInfo({
           isDraggable: true,
           pos: { x, y },
-          shipId: shipId ? Number(shipId) : null,
+          shipId: shipId || null,
           occupiedCells: actualOccupiedCells,
           shipVariant,
           indexCell,

@@ -9,6 +9,7 @@ export type Coord = [number, number];
 export type BoardSize = [number, number];
 
 export interface ShipItemPosition {
+  id: string;
   positions: Coord[];
   margins: Coord[];
   type: ShipType;
@@ -18,7 +19,7 @@ export type CellStatus = "miss" | "hit" | "sunk";
 export type HitStatus = {
   [key: string]: CellStatus;
 };
-export type PlayerFleetShots = Record<number, number>;
+export type PlayerFleetShots = Record<string, number>;
 
 export type PlayerId = string;
 export interface PlayerData {
@@ -27,7 +28,7 @@ export interface PlayerData {
 }
 
 export type ShipsLayout = Record<PlayerId, ShipItemPosition[]>;
-export type OccupiedCells = Record<string, number | string>;
+export type OccupiedCells = Record<string, string>; // value is shipId or "space"
 export type OccupiedCellsPlacementPreview = Record<string, "ship" | "space">;
 export type Hits = Record<PlayerId, HitStatus>;
 export type FleetShots = Record<PlayerId, PlayerFleetShots>;
@@ -37,7 +38,7 @@ export type Phase = "placement" | "in-game" | "game-over";
 export type DragInfo = {
   isDraggable: boolean;
   pos: { x: number; y: number };
-  shipId: number | null;
+  shipId: string | null;
   occupiedCells: OccupiedCells;
   startPoint: Coord | null;
   indexCell: number;

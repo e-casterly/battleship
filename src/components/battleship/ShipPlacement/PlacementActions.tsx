@@ -12,7 +12,7 @@ export function PlacementActions() {
         Randomize ships
       </Button>
       <Button onClick={customizeShipsLayout} icon={<Icon name="hand" />}>
-        Custom placement
+        Reset
       </Button>
     </div>
   );

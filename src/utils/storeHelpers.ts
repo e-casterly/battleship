@@ -29,11 +29,11 @@ export const setDataForPlayers = <T>(
 
 export const getOccupiedCells = (layout: ShipItemPosition[]): OccupiedCells => {
   const occupied: OccupiedCells = {};
-  for (let i = 0; i < layout.length; i++) {
-    for (const pos of layout[i].positions) {
-      occupied[getStringCoordinate(pos)] = i;
+  for (const ship of layout) {
+    for (const pos of ship.positions) {
+      occupied[getStringCoordinate(pos)] = ship.id;
     }
-    for (const pos of layout[i].margins) {
+    for (const pos of ship.margins) {
       occupied[getStringCoordinate(pos)] = "space";
     }
   }
@@ -71,7 +71,7 @@ export const setFleetShots = (
 ): FleetShots => {
   const shots = (playerId: string) =>
     Object.fromEntries(
-      layout[playerId].map((item, index) => [index, item.positions.length]),
+      layout[playerId].map((item) => [item.id, item.positions.length]),
     );
   return Object.fromEntries(playersIds.map((id) => [id, shots(id)]));
 };

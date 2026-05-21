@@ -7,8 +7,10 @@ export const FLEET_CONFIG: FleetConfig = {
   frigate: { size: 4, count: 1 },
   brigantine: { size: 3, count: 1 },
   schooner: { size: 3, count: 1 },
-  sloop: { size: 2, count: 1 },
+  sloop: { size: 2, count: 2 },
 };
+
+export const TOTAL_SHIPS = Object.values(FLEET_CONFIG).reduce((acc, { count }) => acc + count, 0);
 
 export const PLAYERS_IDS = ["player", "computer"];
 export const CURRENT_PLAYER_ID = PLAYERS_IDS[0];

@@ -11,7 +11,7 @@ export function PlacementCell({ cellKey, onPointerDown }: PlacementCellProps) {
   const occupiedCell = usePlacementStore((s) => s.occupiedCells?.[cellKey]);
   const preview = usePlacementStore((s) => s.occupiedCellsPlacementPreview?.[cellKey]);
 
-  const isShip = typeof occupiedCell === "number";
+  const isShip = occupiedCell !== undefined && occupiedCell !== "space";
 
   return (
     <div
