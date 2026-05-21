@@ -29,7 +29,7 @@ export interface PlayerData {
 
 export type ShipsLayout = Record<PlayerId, ShipItemPosition[]>;
 export type OccupiedCells = Record<string, string>; // value is shipId or "space"
-export type OccupiedCellsPlacementPreview = Record<string, "ship" | "space">;
+export type PreviewCells = Record<string, "ship" | "space">;
 export type Hits = Record<PlayerId, HitStatus>;
 export type FleetShots = Record<PlayerId, PlayerFleetShots>;
 
@@ -37,10 +37,8 @@ export type Phase = "placement" | "in-game" | "game-over";
 
 export type DragInfo = {
   isDraggable: boolean;
-  pos: { x: number; y: number };
   shipId: string | null;
   occupiedCells: OccupiedCells;
-  startPoint: Coord | null;
   indexCell: number;
   shipVariant: ShipType | null;
   shipSize: number;

@@ -4,12 +4,12 @@ import cn from "clsx";
 
 interface PlacementCellProps {
   cellKey: string;
+  occupiedCell: string | undefined;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
-export function PlacementCell({ cellKey, onPointerDown }: PlacementCellProps) {
-  const occupiedCell = usePlacementStore((s) => s.occupiedCells?.[cellKey]);
-  const preview = usePlacementStore((s) => s.occupiedCellsPlacementPreview?.[cellKey]);
+export function PlacementCell({ cellKey, occupiedCell, onPointerDown }: PlacementCellProps) {
+  const preview = usePlacementStore((s) => s.previewCells?.[cellKey]);
 
   const isShip = occupiedCell !== undefined && occupiedCell !== "space";
 

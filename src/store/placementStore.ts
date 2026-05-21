@@ -12,8 +12,7 @@ import { generateShipPositions } from "@utils/generateShipPositions.ts";
 import type {
   Coord,
   DragInfo,
-  OccupiedCells,
-  OccupiedCellsPlacementPreview,
+  PreviewCells,
   ShipItemPosition,
   ShipType,
 } from "@utils/gameTypes.ts";
@@ -21,28 +20,35 @@ import type {
 interface PlacementState {
   direction: "h" | "v";
   layout: ShipItemPosition[];
-  occupiedCells: OccupiedCells;
-  occupiedCellsPlacementPreview: OccupiedCellsPlacementPreview;
+  previewCells: PreviewCells;
+  dragPos: { x: number; y: number };
   dragInfo: DragInfo;
 }
 
 interface PlacementActions {
   resetPlacementState: (layout: ShipItemPosition[]) => void;
   randomizeShipsLayout: () => void;
-  customizeShipsLayout: () => void;
+  resetShipsLayout: () => void;
   removeShip: (shipId: string) => void;
-  shipPlacement: (coord: string | null, isPreview?: boolean) => void;
-  onStartDragging: (params: {
-    variant: ShipType | undefined;
-    index: number | undefined;
+  previewShipPlacement: (coord: string) => void;
+  confirmShipPlacement: (coord: string | null) => void;
+  startDragFromPalette: (params: {
+    shipId: string;
+    variant: ShipType;
+    index: number;
+    x: number;
+    y: number;
+    cellSize: number;
+  }) => void;
+  startDragFromBoard: (params: {
     shipId: string;
     coord: string;
     x: number;
     y: number;
     cellSize: number;
   }) => void;
+  setDragPos: (x: number, y: number) => void;
   resetDragInfo: () => void;
-  updateDragInfo: (info: Partial<DragInfo>) => void;
   switchDirection: () => void;
   setPreviewCells: (shipPosition: ShipItemPosition | null) => void;
 }
@@ -54,14 +60,45 @@ const fleetConfig = FLEET_CONFIG;
 
 const initialDragInfo: DragInfo = {
   isDraggable: false,
-  pos: { x: 0, y: 0 },
   shipId: null,
   occupiedCells: {},
-  startPoint: null,
   indexCell: 0,
   shipVariant: null,
   shipSize: 0,
   cellSize: 0,
+};
+
+const initialDragPos = { x: 0, y: 0 };
+
+const computeShipPosition = (
+  coord: string,
+  dragInfo: DragInfo,
+  direction: "h" | "v",
+): ShipItemPosition | null => {
+  const { shipVariant, indexCell, shipId, occupiedCells } = dragInfo;
+  if (!shipVariant || !shipId) return null;
+
+  const dir = direction === "h" ? [0, 1] : [1, 0];
+  const points = getCoords(
+    boardSize,
+    getIntegerCoordinate(coord) as Coord,
+    dir,
+    fleetConfig[shipVariant].size,
+    indexCell ?? 0,
+  );
+
+  if (points.length === 0) return null;
+
+  for (const point of points) {
+    if (occupiedCells[getStringCoordinate(point)] !== undefined) return null;
+  }
+
+  return {
+    id: shipId,
+    positions: points,
+    margins: getMargins(boardSize, points),
+    type: shipVariant,
+  };
 };
 
 export const usePlacementStore = create<PlacementStore>()(
@@ -69,8 +106,8 @@ export const usePlacementStore = create<PlacementStore>()(
     subscribeWithSelector((set, get) => ({
       direction: "h",
       layout: [],
-      occupiedCells: {},
-      occupiedCellsPlacementPreview: {},
+      previewCells: {},
+      dragPos: initialDragPos,
       dragInfo: { ...initialDragInfo },
 
       resetPlacementState: (layout) => {
@@ -78,8 +115,8 @@ export const usePlacementStore = create<PlacementStore>()(
           {
             direction: "h",
             layout,
-            occupiedCells: getOccupiedCells(layout),
-            occupiedCellsPlacementPreview: {},
+            previewCells: {},
+            dragPos: initialDragPos,
             dragInfo: { ...initialDragInfo },
           },
           false,
@@ -89,157 +126,96 @@ export const usePlacementStore = create<PlacementStore>()(
 
       randomizeShipsLayout: () => {
         const layout = generateShipPositions(boardSize, fleetConfig);
-        set(
-          {
-            layout,
-            occupiedCells: getOccupiedCells(layout),
-          },
-          false,
-          "randomizeShipsLayout",
-        );
+        set({ layout }, false, "randomizeShipsLayout");
       },
 
-      customizeShipsLayout: () => {
-        set(
-          { layout: [], occupiedCells: {} },
-          false,
-          "customizeShipsLayout",
-        );
+      resetShipsLayout: () => {
+        set({ layout: [] }, false, "resetShipsLayout");
       },
 
       removeShip: (shipId) => {
         const newLayout = get().layout.filter((s) => s.id !== shipId);
-        set(
-          {
-            layout: newLayout,
-            occupiedCells: getOccupiedCells(newLayout),
-          },
-          false,
-          "removeShip",
-        );
+        set({ layout: newLayout }, false, "removeShip");
       },
 
-      shipPlacement: (coord, isPreview = false) => {
-        if (!isPreview) get().setPreviewCells(null);
+      previewShipPlacement: (coord) => {
+        const { dragInfo, direction } = get();
+        const position = computeShipPosition(coord, dragInfo, direction);
+        get().setPreviewCells(position);
+      },
 
-        const { direction } = get();
-        const { shipVariant, indexCell, shipId, occupiedCells } = get().dragInfo;
-        if (!coord || !shipVariant) {
-          return get().resetDragInfo();
-        }
+      confirmShipPlacement: (coord) => {
+        get().setPreviewCells(null);
+        if (!coord) return get().resetDragInfo();
 
-        const integerCoord: Coord = getIntegerCoordinate(coord);
-        const dir = direction === "h" ? [0, 1] : [1, 0];
-        const shipSize = fleetConfig[shipVariant].size;
+        const { dragInfo, direction, layout: oldLayout } = get();
+        const position = computeShipPosition(coord, dragInfo, direction);
 
-        const points = getCoords(
-          boardSize,
-          integerCoord,
-          dir,
-          shipSize,
-          indexCell !== null ? indexCell : 0,
-        );
+        if (!position) return get().resetDragInfo();
 
-        if (points.length === 0 && !isPreview) return get().resetDragInfo();
-        if (points.length === 0 && isPreview) return;
+        const newLayout = [...oldLayout.filter((s) => s.id !== position.id), position];
 
-        const oldLayout = get().layout;
-        const layoutIdx =
-          shipId !== null ? oldLayout.findIndex((s) => s.id === shipId) : -1;
-        const isPlacedShip = layoutIdx >= 0;
-
-        for (const point of points) {
-          const stringPoint = getStringCoordinate(point);
-          if (occupiedCells[stringPoint] !== undefined) {
-            if (!isPreview) return get().resetDragInfo();
-            return;
-          }
-        }
-
-        const margins = getMargins(boardSize, points);
-        const newId = isPlacedShip
-          ? shipId!
-          : (shipId ?? `${shipVariant}-${get().layout.filter((s) => s.type === shipVariant).length}`);
-        const newShipPosition: ShipItemPosition = {
-          id: newId,
-          margins,
-          positions: points,
-          type: shipVariant,
-        };
-
-        if (isPreview) {
-          return get().setPreviewCells(newShipPosition);
-        }
-
-        const newLayout = isPlacedShip
-          ? [
-              ...oldLayout.slice(0, layoutIdx),
-              newShipPosition,
-              ...oldLayout.slice(layoutIdx + 1),
-            ]
-          : [...oldLayout, newShipPosition];
-
-        set(
-          {
-            layout: newLayout,
-            occupiedCells: getOccupiedCells(newLayout),
-          },
-          false,
-          "shipPlacement",
-        );
-
+        set({ layout: newLayout }, false, "confirmShipPlacement");
         get().resetDragInfo();
       },
 
-      onStartDragging: ({ variant, index, shipId, coord, x, y, cellSize }) => {
-        let shipVariant = variant;
-        let indexCell = index;
+      startDragFromPalette: ({ shipId, variant, index, x, y, cellSize }) => {
+        set(
+          {
+            dragPos: { x, y },
+            dragInfo: {
+              isDraggable: true,
+              shipId,
+              occupiedCells: getOccupiedCells(get().layout),
+              shipVariant: variant,
+              indexCell: index,
+              shipSize: fleetConfig[variant].size,
+              cellSize,
+            },
+          },
+          false,
+          "startDragFromPalette",
+        );
+      },
 
-        const oldLayout = get().layout;
-        const layoutIdx = shipId
-          ? oldLayout.findIndex((s) => s.id === shipId)
-          : -1;
+      startDragFromBoard: ({ shipId, coord, x, y, cellSize }) => {
+        const layout = get().layout;
+        const ship = layout.find((s) => s.id === shipId);
+        if (!ship) return;
 
-        if (layoutIdx >= 0) {
-          const layoutInfo = oldLayout[layoutIdx];
-          if (!layoutInfo) return;
-          shipVariant = layoutInfo.type;
-          if (coord) {
-            const integerCoord = getIntegerCoordinate(coord);
-            indexCell = layoutInfo.positions.findIndex(
-              (item) =>
-                item[0] === integerCoord[0] && item[1] === integerCoord[1],
-            );
-          }
-        }
-        if (!shipVariant || indexCell === undefined) return;
+        const integerCoord = getIntegerCoordinate(coord);
+        const indexCell = ship.positions.findIndex(
+          ([r, c]) => r === integerCoord[0] && c === integerCoord[1],
+        );
 
-        const actualOccupiedCells =
-          layoutIdx >= 0
-            ? getOccupiedCells([
-                ...oldLayout.slice(0, layoutIdx),
-                ...oldLayout.slice(layoutIdx + 1),
-              ])
-            : get().occupiedCells;
+        set(
+          {
+            dragPos: { x, y },
+            dragInfo: {
+              isDraggable: true,
+              shipId,
+              occupiedCells: getOccupiedCells(layout.filter((s) => s.id !== shipId)),
+              shipVariant: ship.type,
+              indexCell,
+              shipSize: fleetConfig[ship.type].size,
+              cellSize,
+            },
+          },
+          false,
+          "startDragFromBoard",
+        );
+      },
 
-        get().updateDragInfo({
-          isDraggable: true,
-          pos: { x, y },
-          shipId: shipId || null,
-          occupiedCells: actualOccupiedCells,
-          shipVariant,
-          indexCell,
-          shipSize: fleetConfig[shipVariant].size,
-          cellSize,
-        });
+      setDragPos: (x, y) => {
+        set({ dragPos: { x, y } }, false, "setDragPos");
       },
 
       resetDragInfo: () => {
-        set({ dragInfo: { ...initialDragInfo } }, false, "resetDragInfo");
-      },
-
-      updateDragInfo: (info) => {
-        set({ dragInfo: { ...get().dragInfo, ...info } }, false, "updateDragInfo");
+        set(
+          { dragPos: initialDragPos, dragInfo: { ...initialDragInfo } },
+          false,
+          "resetDragInfo",
+        );
       },
 
       switchDirection: () => {
@@ -251,16 +227,16 @@ export const usePlacementStore = create<PlacementStore>()(
       },
 
       setPreviewCells: (shipPosition) => {
-        const occupiedCellsPlacementPreview: OccupiedCellsPlacementPreview = {};
+        const previewCells: PreviewCells = {};
         if (shipPosition) {
           for (const pos of shipPosition.positions) {
-            occupiedCellsPlacementPreview[getStringCoordinate(pos)] = "ship";
+            previewCells[getStringCoordinate(pos)] = "ship";
           }
           for (const pos of shipPosition.margins) {
-            occupiedCellsPlacementPreview[getStringCoordinate(pos)] = "space";
+            previewCells[getStringCoordinate(pos)] = "space";
           }
         }
-        set({ occupiedCellsPlacementPreview }, false, "setPreviewCells");
+        set({ previewCells }, false, "setPreviewCells");
       },
     })),
     { name: "PlacementStore" },

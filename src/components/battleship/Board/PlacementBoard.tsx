@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { usePlacementStore } from "@store/placementStore.ts";
 import { BOARD_SIZE } from "@utils/constants.ts";
 import { getStringCoordinate } from "@utils/helpers.ts";
+import { getOccupiedCells } from "@utils/storeHelpers.ts";
 import { BoardShell } from "@components/battleship/Board/BoardShell.tsx";
 import { PlacementCell } from "@components/battleship/Board/PlacementCell.tsx";
 
@@ -13,6 +14,9 @@ interface PlacementBoardProps {
 export function PlacementBoard({ onPointerDown }: PlacementBoardProps) {
   const [rows, cols] = BOARD_SIZE;
   const isDragging = usePlacementStore((s) => s.dragInfo.isDraggable);
+  const layout = usePlacementStore((s) => s.layout);
+
+  const occupiedCells = useMemo(() => getOccupiedCells(layout), [layout]);
 
   const cells = useMemo(() => {
     const arr = [];
@@ -27,7 +31,12 @@ export function PlacementBoard({ onPointerDown }: PlacementBoardProps) {
   return (
     <BoardShell rows={rows} cols={cols} isFocused={isDragging} label="Placement board">
       {cells.map(({ key }) => (
-        <PlacementCell key={key} cellKey={key} onPointerDown={onPointerDown} />
+        <PlacementCell
+          key={key}
+          cellKey={key}
+          occupiedCell={occupiedCells[key]}
+          onPointerDown={onPointerDown}
+        />
       ))}
     </BoardShell>
   );

@@ -1,39 +1,38 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import * as React from "react";
 import { usePlacementStore } from "@store/placementStore.ts";
 import { throttleRaf } from "@utils/throttleRaf.ts";
 import type { ShipType } from "@utils/gameTypes.ts";
 
 export function useDragHandlers() {
-  const shipPlacement = usePlacementStore((s) => s.shipPlacement);
-  const onStartDragging = usePlacementStore((s) => s.onStartDragging);
-  const updateDragInfo = usePlacementStore((s) => s.updateDragInfo);
-  const switchDirection = usePlacementStore((s) => s.switchDirection);
   const isDraggable = usePlacementStore((s) => s.dragInfo.isDraggable);
 
   const setPosThrottled = useMemo(
     () =>
       throttleRaf((x: number, y: number) => {
-        updateDragInfo({ pos: { x, y } });
+        usePlacementStore.getState().setDragPos(x, y);
       }),
-    [updateDragInfo],
+    [],
   );
 
   const placePreviewThrottled = useMemo(
-    () => throttleRaf((coord: string | null) => shipPlacement(coord, true)),
-    [shipPlacement],
+    () =>
+      throttleRaf((coord: string) => {
+        usePlacementStore.getState().previewShipPlacement(coord);
+      }),
+    [],
   );
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         e.preventDefault();
-        switchDirection();
+        usePlacementStore.getState().switchDirection();
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [switchDirection]);
+  }, []);
 
   useEffect(() => {
     if (!isDraggable) return;
@@ -50,11 +49,11 @@ export function useDragHandlers() {
 
     const onEnd = (e: PointerEvent) => {
       const cell = document.elementFromPoint(e.clientX, e.clientY);
-      const coord = cell?.getAttribute?.("data-coord");
-      shipPlacement(coord ?? null);
+      const coord = cell?.getAttribute?.("data-coord") ?? null;
+      usePlacementStore.getState().confirmShipPlacement(coord);
     };
 
-    const onCancel = () => shipPlacement(null);
+    const onCancel = () => usePlacementStore.getState().confirmShipPlacement(null);
 
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onEnd, { once: true });
@@ -64,26 +63,29 @@ export function useDragHandlers() {
       document.removeEventListener("pointerup", onEnd);
       document.removeEventListener("pointercancel", onCancel);
     };
-  }, [isDraggable, placePreviewThrottled, setPosThrottled, shipPlacement]);
+  }, [isDraggable, setPosThrottled, placePreviewThrottled]);
 
-  function onPointerDown(
-    e: React.PointerEvent<HTMLDivElement>,
-    variant?: ShipType,
-    index?: number,
-  ) {
-    e.preventDefault();
-    const shipId = e.currentTarget?.getAttribute("data-ship") || "";
-    const coord = e.currentTarget?.getAttribute("data-coord") || "";
-    onStartDragging({
-      variant,
-      index,
-      shipId,
-      coord,
-      x: e.clientX,
-      y: e.clientY,
-      cellSize: e.currentTarget.clientWidth,
-    });
-  }
+  const onPointerDown = useCallback(
+    (
+      e: React.PointerEvent<HTMLDivElement>,
+      variant?: ShipType,
+      index?: number,
+    ) => {
+      e.preventDefault();
+      const shipId = e.currentTarget.getAttribute("data-ship") ?? "";
+      const coord = e.currentTarget.getAttribute("data-coord") ?? "";
+      const cellSize = e.currentTarget.clientWidth;
+      const x = e.clientX;
+      const y = e.clientY;
+
+      if (variant !== undefined && index !== undefined) {
+        usePlacementStore.getState().startDragFromPalette({ shipId, variant, index, x, y, cellSize });
+      } else {
+        usePlacementStore.getState().startDragFromBoard({ shipId, coord, x, y, cellSize });
+      }
+    },
+    [],
+  );
 
   return { onPointerDown };
 }

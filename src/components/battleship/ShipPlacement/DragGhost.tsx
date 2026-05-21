@@ -3,8 +3,10 @@ import { usePlacementStore } from "@store/placementStore.ts";
 import { useEffect, useMemo, useRef } from "react";
 
 export function DragGhost() {
-  const { isDraggable, shipSize, indexCell, cellSize } =
-    usePlacementStore((s) => s.dragInfo);
+  const isDraggable = usePlacementStore((s) => s.dragInfo.isDraggable);
+  const shipSize = usePlacementStore((s) => s.dragInfo.shipSize);
+  const indexCell = usePlacementStore((s) => s.dragInfo.indexCell);
+  const cellSize = usePlacementStore((s) => s.dragInfo.cellSize);
   const direction = usePlacementStore((s) => s.direction);
 
   const isHorizontal = direction === "h";
@@ -14,9 +16,9 @@ export function DragGhost() {
     if (!isDraggable) return;
 
     const unsub = usePlacementStore.subscribe(
-      (s) => s.dragInfo.pos,
+      (s) => s.dragPos,
       (pos) => {
-        if (!pos || !ghostRef.current) return;
+        if (!ghostRef.current) return;
         const x = isHorizontal
           ? pos.x - indexCell * cellSize - cellSize / 2
           : pos.x - cellSize / 2;
@@ -29,9 +31,7 @@ export function DragGhost() {
       { fireImmediately: true },
     );
 
-    return () => {
-      unsub();
-    };
+    return () => unsub();
   }, [isDraggable, isHorizontal, indexCell, cellSize]);
 
   const segments = useMemo(
