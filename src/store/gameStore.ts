@@ -54,7 +54,7 @@ interface GameActions {
     cellKey: string,
   ) => { result: CellStatus; excludedCoords: string[]; shipType?: ShipType };
   playerMove: (playerId: PlayerId, cellKey: string) => void;
-  computerMove: () => void;
+  computerMove: () => boolean;
   setHistory: (
     event: "start" | "turn" | "miss" | "hit" | "sunk" | "win",
     options: { cellKey?: string; shipType?: string },
@@ -67,6 +67,8 @@ type GameStore = GameState & GameActions;
 const getEmptyGameplayState = () => ({
   phase: "placement" as Phase,
   turn: null as PlayerId | null,
+  history: [] as string[],
+  move: 0,
   hits: setDataForPlayers(PLAYERS_IDS, {}),
   fleetShots: setDataForPlayers(PLAYERS_IDS, {}),
   shipsLayout: setDataForPlayers(PLAYERS_IDS, [] as never),
@@ -75,8 +77,6 @@ const getEmptyGameplayState = () => ({
     PLAYERS_IDS,
     {} as Record<ShipType, number>,
   ),
-  history: [] as string[],
-  move: 0,
 });
 
 export const useGameStore = create<GameStore>()(
@@ -91,9 +91,6 @@ export const useGameStore = create<GameStore>()(
         const nextTurn = currentTurn === player1 ? player2 : player1;
         set({ turn: nextTurn, move: get().move + 1 }, false, "switchTurn");
         get().setHistory("turn", {});
-        if (nextTurn !== CURRENT_PLAYER_ID) {
-          setTimeout(() => get().computerMove(), 600);
-        }
       },
 
       changeRemainingShipAmount: (playerId, shipVariant) => {
@@ -224,7 +221,10 @@ export const useGameStore = create<GameStore>()(
       computerMove: () => {
         const { remainingCoords, focusCoords } = useAiStore.getState();
         const nextPoint = getNextPoint(remainingCoords, focusCoords);
-        if (!nextPoint) return get().switchTurn();
+        if (!nextPoint) {
+          get().switchTurn();
+          return false;
+        }
 
         const cellKey = getStringCoordinate(nextPoint);
         const { result, excludedCoords, shipType } = get().fire(
@@ -248,12 +248,14 @@ export const useGameStore = create<GameStore>()(
         });
 
         get().setHistory(result, { cellKey, shipType });
+
         if (result === "miss") {
           get().switchTurn();
-        } else {
-          const winner = get().checkWinner(CURRENT_PLAYER_ID);
-          if (!winner) setTimeout(() => get().computerMove(), 500);
+          return false;
         }
+
+        const winner = get().checkWinner(CURRENT_PLAYER_ID);
+        return !winner;
       },
 
       setHistory: (event, { cellKey = "", shipType = "" }) => {

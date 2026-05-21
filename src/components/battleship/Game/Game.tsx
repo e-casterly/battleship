@@ -1,9 +1,11 @@
 import { useGameStore } from "@store/gameStore.ts";
+import { useComputerTurn } from "@utils/useComputerTurn.ts";
 import { ShipPlacement } from "@components/battleship/ShipPlacement/ShipPlacement.tsx";
 import { BattleView } from "@components/battleship/Game/BattleView.tsx";
 import { GameOverBanner } from "@components/battleship/Game/GameOverBanner.tsx";
 
 export default function Game() {
+  useComputerTurn();
   const phase = useGameStore((s) => s.phase);
 
   if (phase === "placement") return <ShipPlacement />;
