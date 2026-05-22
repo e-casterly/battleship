@@ -3,7 +3,8 @@ import { useGameStore } from "@store/gameStore.ts";
 import { useAiStore } from "@store/aiStore.ts";
 import { getNextPoint } from "@utils/aiLogic.ts";
 import { getStringCoordinate } from "@utils/helpers.ts";
-import { CURRENT_PLAYER_ID, AI_SHOT_DELAY_MS } from "@utils/constants.ts";
+import { CURRENT_PLAYER_ID, AI_SHOT_DELAY_MS, FLEET_CONFIG } from "@utils/constants.ts";
+import type { ShipType } from "@utils/gameTypes.ts";
 
 export function useComputerTurn() {
   const phase = useGameStore((s) => s.phase);
@@ -17,7 +18,13 @@ export function useComputerTurn() {
 
   const executeComputerMove = useCallback(() => {
     const { remainingCoords, focusCoords } = useAiStore.getState();
-    const nextPoint = getNextPoint(remainingCoords, focusCoords);
+
+    const remainingShips = useGameStore.getState().remainingShips[CURRENT_PLAYER_ID];
+    const minShipSize = Object.entries(remainingShips)
+      .filter(([, count]) => count > 0)
+      .reduce((min, [type]) => Math.min(min, FLEET_CONFIG[type as ShipType].size), Infinity);
+
+    const nextPoint = getNextPoint(remainingCoords, focusCoords, minShipSize);
 
     if (!nextPoint) {
       useGameStore.getState().switchTurn();

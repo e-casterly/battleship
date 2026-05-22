@@ -28,18 +28,22 @@ const getSidePoints = (coords: Coord[]) => {
   return coords;
 };
 
-const getCheckerboardCoords = (remainingCoords: Set<string>): Set<string> => {
-  const checkerboard = new Set<string>();
+// Filters hunt coords to a diagonal stripe pattern with the given step.
+// Any run of `step` consecutive cells in a row or column contains exactly
+// one selected cell, so no ship of size >= step can be missed.
+const getHuntCoords = (remainingCoords: Set<string>, step: number): Set<string> => {
+  const filtered = new Set<string>();
   for (const coord of remainingCoords) {
     const [r, c] = getIntegerCoordinate(coord);
-    if ((r + c) % 2 === 0) checkerboard.add(coord);
+    if ((r + c) % step === 0) filtered.add(coord);
   }
-  return checkerboard.size > 0 ? checkerboard : remainingCoords;
+  return filtered.size > 0 ? filtered : remainingCoords;
 };
 
 export const getNextPoint = (
   remainingCoords: Set<string>,
   focusCoords: Coord[],
+  minShipSize: number,
 ) => {
   if (focusCoords.length) {
     const dirs = getDirections(focusCoords);
@@ -57,5 +61,5 @@ export const getNextPoint = (
       }
     }
   }
-  return getFreePointFromSet(getCheckerboardCoords(remainingCoords));
+  return getFreePointFromSet(getHuntCoords(remainingCoords, minShipSize));
 };
