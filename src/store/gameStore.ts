@@ -19,7 +19,7 @@ import type {
   CellStatus,
   FleetShots,
   Hits,
-  OccupiedCells,
+  ShipCells,
   PlayerData,
   PlayerId,
   Phase,
@@ -36,7 +36,7 @@ interface GameState {
   hits: Hits;
   fleetShots: FleetShots;
   shipsLayout: ShipsLayout;
-  occupiedCells: Record<PlayerId, OccupiedCells>;
+  occupiedCells: Record<PlayerId, ShipCells>;
   remainingShips: Record<PlayerId, Record<ShipType, number>>;
 }
 
@@ -68,7 +68,7 @@ const getEmptyGameplayState = () => ({
   hits: setDataForPlayers(PLAYERS_IDS, () => ({} as Hits[string])),
   fleetShots: setDataForPlayers(PLAYERS_IDS, () => ({} as FleetShots[string])),
   shipsLayout: setDataForPlayers(PLAYERS_IDS, () => [] as ShipItemPosition[]),
-  occupiedCells: setDataForPlayers(PLAYERS_IDS, () => ({} as OccupiedCells)),
+  occupiedCells: setDataForPlayers(PLAYERS_IDS, () => ({} as ShipCells)),
   remainingShips: setDataForPlayers(PLAYERS_IDS, () => ({} as Record<ShipType, number>)),
 });
 

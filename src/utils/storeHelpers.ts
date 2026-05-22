@@ -4,7 +4,8 @@ import type {
   ShipsLayout,
   PlayerId,
   FleetConfig,
-  OccupiedCells,
+  ShipCells,
+  PlacementCells,
   ShipItemPosition,
 } from "./gameTypes.ts";
 import { getStringCoordinate } from "@utils/helpers.ts";
@@ -27,9 +28,8 @@ export const setDataForPlayers = <T>(
   ) as Record<PlayerId, T>;
 };
 
-// Includes ship positions and margin spaces — used in placement for collision detection and UI
-export const getOccupiedCells = (layout: ShipItemPosition[]): OccupiedCells => {
-  const occupied: OccupiedCells = {};
+export const getOccupiedCells = (layout: ShipItemPosition[]): PlacementCells => {
+  const occupied: PlacementCells = {};
   for (const ship of layout) {
     for (const pos of ship.positions) {
       occupied[getStringCoordinate(pos)] = ship.id;
@@ -41,9 +41,8 @@ export const getOccupiedCells = (layout: ShipItemPosition[]): OccupiedCells => {
   return occupied;
 };
 
-// Ship positions only — used in game phase for fire lookup
-export const getShipCells = (layout: ShipItemPosition[]): OccupiedCells => {
-  const occupied: OccupiedCells = {};
+export const getShipCells = (layout: ShipItemPosition[]): ShipCells => {
+  const occupied: ShipCells = {};
   for (const ship of layout) {
     for (const pos of ship.positions) {
       occupied[getStringCoordinate(pos)] = ship.id;
@@ -55,7 +54,7 @@ export const getShipCells = (layout: ShipItemPosition[]): OccupiedCells => {
 export const setOccupiedCellsForPlayers = (
   playersIds: PlayerId[],
   layouts: ShipsLayout,
-) =>
+): Record<PlayerId, ShipCells> =>
   Object.fromEntries(
     playersIds.map((id) => [id, getShipCells(layouts[id])]),
   );

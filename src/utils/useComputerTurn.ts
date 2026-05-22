@@ -3,7 +3,7 @@ import { useGameStore } from "@store/gameStore.ts";
 import { useAiStore } from "@store/aiStore.ts";
 import { getNextPoint } from "@utils/aiLogic.ts";
 import { getStringCoordinate } from "@utils/helpers.ts";
-import { CURRENT_PLAYER_ID } from "@utils/constants.ts";
+import { CURRENT_PLAYER_ID, AI_SHOT_DELAY_MS } from "@utils/constants.ts";
 
 export function useComputerTurn() {
   const phase = useGameStore((s) => s.phase);
@@ -49,12 +49,12 @@ export function useComputerTurn() {
     const schedule = (delay: number) => {
       const id = setTimeout(() => {
         const shouldContinue = executeComputerMove();
-        if (shouldContinue) schedule(500);
+        if (shouldContinue) schedule(AI_SHOT_DELAY_MS);
       }, delay);
       timeouts.push(id);
     };
 
-    schedule(600);
+    schedule(AI_SHOT_DELAY_MS);
     return () => timeouts.forEach(clearTimeout);
   }, [phase, turn, executeComputerMove]);
 }

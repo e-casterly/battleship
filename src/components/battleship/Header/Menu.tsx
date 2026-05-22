@@ -1,6 +1,8 @@
 import Icon from "@components/common/Icon/Icon.tsx";
 import Button from "@components/common/Button/Button.tsx";
 import { useGameStore } from "@store/gameStore.ts";
+import { usePlacementStore } from "@store/placementStore.ts";
+import { CURRENT_PLAYER_ID } from "@utils/constants.ts";
 import { useState } from "react";
 import cn from 'clsx';
 import { ThemeToggle } from "@components/battleship/Header/ThemeToggle.tsx";
@@ -9,6 +11,12 @@ export function Menu() {
   const startNewGame = useGameStore((s) => s.startNewGame);
   const resetSameGame = useGameStore((s) => s.resetSameGame);
   const phase = useGameStore((s) => s.phase);
+
+  function handleResetSameGame() {
+    const playerLayout = useGameStore.getState().shipsLayout[CURRENT_PLAYER_ID];
+    usePlacementStore.getState().resetPlacementState(playerLayout);
+    resetSameGame();
+  }
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -53,7 +61,7 @@ export function Menu() {
             </div>
             {phase !== "placement" && (
               <>
-                <Button variant="text" onClick={() => handleClick(resetSameGame)}>
+                <Button variant="text" onClick={() => handleClick(handleResetSameGame)}>
                   Reset
                 </Button>
                 <Button variant="text" onClick={() => handleClick(startNewGame)}>

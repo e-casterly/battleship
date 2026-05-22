@@ -24,4 +24,6 @@ export const VERTICAL_DIRS = [
   [-1, 0],
 ];
 
-export const DIRS: number[][] = [...HORIZONTAL_DIRS, ...VERTICAL_DIRS] as const;
+export const DIRS: number[][] = [...HORIZONTAL_DIRS, ...VERTICAL_DIRS];
+
+export const AI_SHOT_DELAY_MS = 600;
