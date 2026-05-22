@@ -22,7 +22,7 @@ export function PlacementPanel({ onPointerDown }: PlacementPanelProps) {
   const layout = usePlacementStore((s) => s.layout);
   const switchDirection = usePlacementStore((s) => s.switchDirection);
 
-  const leftToPlace = TOTAL_SHIPS - layout.length;
+  const leftToPlace = Math.max(0, TOTAL_SHIPS - layout.length);
 
   return (
     <div className="col-span-12 lg:col-span-6 flex flex-col gap-4 justify-self-center lg:justify-self-end">

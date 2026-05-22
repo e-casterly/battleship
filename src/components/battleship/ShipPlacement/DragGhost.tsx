@@ -5,8 +5,6 @@ import { useEffect, useMemo, useRef } from "react";
 export function DragGhost() {
   const isDraggable = usePlacementStore((s) => s.dragInfo.isDraggable);
   const shipSize = usePlacementStore((s) => s.dragInfo.shipSize);
-  const indexCell = usePlacementStore((s) => s.dragInfo.indexCell);
-  const cellSize = usePlacementStore((s) => s.dragInfo.cellSize);
   const direction = usePlacementStore((s) => s.direction);
 
   const isHorizontal = direction === "h";
@@ -19,10 +17,14 @@ export function DragGhost() {
       (s) => s.dragPos,
       (pos) => {
         if (!ghostRef.current) return;
-        const x = isHorizontal
+        const { dragInfo, direction } = usePlacementStore.getState();
+        const horizontal = direction === "h";
+        const { indexCell, cellSize } = dragInfo;
+
+        const x = horizontal
           ? pos.x - indexCell * cellSize - cellSize / 2
           : pos.x - cellSize / 2;
-        const y = isHorizontal
+        const y = horizontal
           ? pos.y - cellSize / 2
           : pos.y - indexCell * cellSize - cellSize / 2;
 
@@ -32,7 +34,7 @@ export function DragGhost() {
     );
 
     return () => unsub();
-  }, [isDraggable, isHorizontal, indexCell, cellSize]);
+  }, [isDraggable, isHorizontal]);
 
   const segments = useMemo(
     () =>

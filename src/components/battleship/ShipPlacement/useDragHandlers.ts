@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as React from "react";
 import { usePlacementStore } from "@store/placementStore.ts";
 import { throttleRaf } from "@utils/throttleRaf.ts";
 import type { ShipType } from "@utils/gameTypes.ts";
 
+const INTERACTIVE_TAGS = new Set(["INPUT", "TEXTAREA", "BUTTON", "SELECT"]);
+
 export function useDragHandlers() {
   const isDraggable = usePlacementStore((s) => s.dragInfo.isDraggable);
+  const lastCoordRef = useRef<string | null>(null);
 
   const setPosThrottled = useMemo(
     () =>
@@ -25,9 +28,12 @@ export function useDragHandlers() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        e.preventDefault();
-        usePlacementStore.getState().switchDirection();
+      if (e.code !== "Space" || e.repeat) return;
+      if (INTERACTIVE_TAGS.has((e.target as HTMLElement).tagName)) return;
+      e.preventDefault();
+      usePlacementStore.getState().switchDirection();
+      if (lastCoordRef.current) {
+        usePlacementStore.getState().previewShipPlacement(lastCoordRef.current);
       }
     };
     window.addEventListener("keydown", handleKey);
@@ -44,20 +50,27 @@ export function useDragHandlers() {
 
       const el = document.elementFromPoint(last.clientX, last.clientY);
       const coord = el?.getAttribute?.("data-coord");
-      if (coord) placePreviewThrottled(coord);
+      if (coord) {
+        lastCoordRef.current = coord;
+        placePreviewThrottled(coord);
+      }
     };
 
     const onEnd = (e: PointerEvent) => {
       const cell = document.elementFromPoint(e.clientX, e.clientY);
       const coord = cell?.getAttribute?.("data-coord") ?? null;
+      lastCoordRef.current = null;
       usePlacementStore.getState().confirmShipPlacement(coord);
     };
 
-    const onCancel = () => usePlacementStore.getState().confirmShipPlacement(null);
+    const onCancel = () => {
+      lastCoordRef.current = null;
+      usePlacementStore.getState().confirmShipPlacement(null);
+    };
 
     document.addEventListener("pointermove", onMove);
-    document.addEventListener("pointerup", onEnd, { once: true });
-    document.addEventListener("pointercancel", onCancel, { once: true });
+    document.addEventListener("pointerup", onEnd);
+    document.addEventListener("pointercancel", onCancel);
     return () => {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onEnd);

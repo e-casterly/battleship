@@ -26,7 +26,7 @@ export const PlacementCell = memo(function PlacementCell({
       )}
       data-coord={cellKey}
       data-ship={isShip ? occupiedCell : undefined}
-      onPointerDown={onPointerDown}
+      onPointerDown={isShip ? onPointerDown : undefined}
     >
       {(occupiedCell === "space" || preview === "space") && (
         <div

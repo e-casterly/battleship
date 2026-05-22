@@ -65,11 +65,11 @@ const initialDragInfo: DragInfo = {
 
 const initialDragPos = { x: 0, y: 0 };
 
-const resetDragState = {
+const getResetDragState = () => ({
   dragPos: initialDragPos,
   dragInfo: { ...initialDragInfo },
   previewCells: {} as PreviewCells,
-};
+});
 
 const buildPreviewCells = (shipPosition: ShipItemPosition | null): PreviewCells => {
   const previewCells: PreviewCells = {};
@@ -126,7 +126,7 @@ export const usePlacementStore = create<PlacementStore>()(
 
       resetPlacementState: (layout) => {
         set(
-          { direction: "h", layout, ...resetDragState },
+          { direction: "h", layout, ...getResetDragState() },
           false,
           "resetPlacementState",
         );
@@ -153,15 +153,15 @@ export const usePlacementStore = create<PlacementStore>()(
       },
 
       confirmShipPlacement: (coord) => {
-        if (!coord) return set(resetDragState, false, "resetDrag");
+        if (!coord) return set(getResetDragState(), false, "resetDrag");
 
         const { dragInfo, direction, layout: oldLayout } = get();
         const position = computeShipPosition(coord, dragInfo, direction);
 
-        if (!position) return set(resetDragState, false, "resetDrag");
+        if (!position) return set(getResetDragState(), false, "resetDrag");
 
         const newLayout = [...oldLayout.filter((s) => s.id !== position.id), position];
-        set({ layout: newLayout, ...resetDragState }, false, "confirmShipPlacement");
+        set({ layout: newLayout, ...getResetDragState() }, false, "confirmShipPlacement");
       },
 
       startDragFromPalette: ({ shipId, variant, index, x, y, cellSize }) => {

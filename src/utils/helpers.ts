@@ -21,7 +21,7 @@ export const shuffleDirs = (dirs: number[][] = DIRS): number[][] => {
 };
 
 export const checkIsHorizontal = (points: Coord[]) =>
-  points[0][0] === points[1][0];
+  points.length >= 2 && points[0][0] === points[1][0];
 
 export const getFreeCoordsSet = (boardSize: [number, number] = [10, 10]) => {
   const freeCoords = new Set<string>();

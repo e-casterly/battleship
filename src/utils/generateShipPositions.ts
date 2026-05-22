@@ -38,83 +38,65 @@ export function getOccupiedPoints(
     updatedFreeCoordsSet.delete(getStringCoordinate(margin));
   }
 
-  return {
-    positions: points,
-    margins: margins,
-    updatedFreeCoordsSet,
-  };
+  return { positions: points, margins, updatedFreeCoordsSet };
+}
+
+function findShipPoints(
+  boardSize: [number, number],
+  shipSize: number,
+  initialFreeCoords: Set<string>,
+) {
+  let freeCoordsSet = new Set(initialFreeCoords);
+
+  while (freeCoordsSet.size > 0) {
+    const startPoint = getFreePointFromSet(freeCoordsSet);
+    if (!startPoint) return null;
+
+    for (const dir of shuffleDirs()) {
+      const result = getOccupiedPoints(boardSize, freeCoordsSet, startPoint, dir, shipSize);
+      if (result) return result;
+    }
+
+    freeCoordsSet = new Set(freeCoordsSet);
+    freeCoordsSet.delete(getStringCoordinate(startPoint));
+  }
+
+  return null;
 }
 
 export function generateShipPositions(
   boardSize: [number, number] = [10, 10],
   fleet: FleetConfig,
 ): ShipItemPosition[] {
-  let freeCoords = getFreeCoordsSet(boardSize);
+  const MAX_ATTEMPTS = 20;
 
-  const getShipPoints = (shipSize: number, freeCoordsSet: Set<string>) => {
-    const startPoint = getFreePointFromSet(freeCoordsSet);
-    if (!startPoint) return null;
-
-    const shuffledDirs = shuffleDirs();
-    for (const dir of shuffledDirs) {
-      const occupiedPoints = getOccupiedPoints(
-        boardSize,
-        freeCoordsSet,
-        startPoint,
-        dir,
-        shipSize,
-      );
-      if (!occupiedPoints) continue;
-
-      const { positions, margins, updatedFreeCoordsSet } = occupiedPoints;
-
-      return {
-        positions,
-        margins,
-        updatedFreeCoordsSet,
-      };
-    }
-    const newShipSet = new Set(freeCoordsSet);
-    newShipSet.delete(getStringCoordinate(startPoint));
-    return getShipPoints(shipSize, newShipSet);
-  };
-
-  const getShipsData = (attempts: number) => {
+  for (let attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
+    let freeCoords = getFreeCoordsSet(boardSize);
     const shipPositions: ShipItemPosition[] = [];
-    for (const ship in fleet) {
-      const currentShip = ship as keyof FleetConfig;
-      const size = fleet[currentShip]["size"];
-      for (let i = 0; i < fleet[currentShip]["count"]; i++) {
-        const shipData = getShipPoints(size, freeCoords);
-        if (!shipData) {
-          if (attempts > 20) {
-            return null;
-          }
-          freeCoords = getFreeCoordsSet(boardSize);
-          return getShipsData(attempts + 1);
-        }
-        freeCoords = new Set(shipData.updatedFreeCoordsSet);
-        const { positions, margins } = shipData;
-        shipPositions.push({
-          id: `${currentShip}-${i}`,
-          positions,
-          margins,
-          type: currentShip,
-        });
-      }
-    }
-    return shipPositions;
-  };
+    let failed = false;
 
-  const result: Partial<ShipItemPosition[]> | null = getShipsData(0);
-  if (!result) {
-    const preset = layoutPresets[Math.floor(Math.random() * layoutPresets.length)];
-    const typeCounts: Record<string, number> = {};
-    return (preset as Omit<ShipItemPosition, "id">[]).map((s) => {
-      typeCounts[s.type] = typeCounts[s.type] ?? 0;
-      const id = `${s.type}-${typeCounts[s.type]++}`;
-      return { ...s, id };
-    });
+    for (const ship in fleet) {
+      const type = ship as keyof FleetConfig;
+      const { size, count } = fleet[type];
+
+      for (let i = 0; i < count; i++) {
+        const shipData = findShipPoints(boardSize, size, freeCoords);
+        if (!shipData) { failed = true; break; }
+
+        freeCoords = shipData.updatedFreeCoordsSet;
+        shipPositions.push({ id: `${type}-${i}`, positions: shipData.positions, margins: shipData.margins, type });
+      }
+
+      if (failed) break;
+    }
+
+    if (!failed) return shipPositions;
   }
-  return result as ShipItemPosition[];
+
+  const preset = layoutPresets[Math.floor(Math.random() * layoutPresets.length)];
+  const typeCounts: Record<string, number> = {};
+  return (preset as Omit<ShipItemPosition, "id">[]).map((s) => {
+    typeCounts[s.type] = typeCounts[s.type] ?? 0;
+    return { ...s, id: `${s.type}-${typeCounts[s.type]++}` };
+  });
 }
