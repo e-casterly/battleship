@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useMemo } from "react";
 import type { ShipType } from "@utils/gameTypes.ts";
 import { FLEET_CONFIG } from "@utils/constants.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
@@ -14,10 +15,17 @@ interface ShipPaletteProps {
 }
 
 export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
-  const fleet = FLEET_CONFIG;
   const direction = usePlacementStore((s) => s.direction);
   const layout = usePlacementStore((s) => s.layout);
   const removeShip = usePlacementStore((s) => s.removeShip);
+
+  const { placedIds, placedCountByType } = useMemo(() => ({
+    placedIds: new Set(layout.map((s) => s.id)),
+    placedCountByType: layout.reduce<Record<string, number>>((acc, s) => {
+      acc[s.type] = (acc[s.type] ?? 0) + 1;
+      return acc;
+    }, {}),
+  }), [layout]);
 
   return (
     <div
@@ -26,9 +34,9 @@ export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
         "flex-col": direction === "h",
       })}
     >
-      {(Object.keys(fleet) as ShipType[]).map((variant) => {
-        const { size, count } = fleet[variant];
-        const remaining = count - layout.filter((s) => s.type === variant).length;
+      {(Object.keys(FLEET_CONFIG) as ShipType[]).map((variant) => {
+        const { size, count } = FLEET_CONFIG[variant];
+        const remaining = count - (placedCountByType[variant] ?? 0);
         return (
           <div
             key={variant}
@@ -43,23 +51,20 @@ export function ShipPalette({ onPointerDown }: ShipPaletteProps) {
               )}
             >
               <div>{remaining} x</div>
-              <div
-                className={cn("cell-size", { "text-note": remaining === 0 })}
-              >
+              <div className={cn("cell-size", { "text-note": remaining === 0 })}>
                 <Icon name={variant} size="auto" />
               </div>
             </div>
             <div className="flex-1 flex gap-2">
               {Array.from({ length: count }).map((_, i) => {
                 const shipId = `${variant}-${i}`;
-                const isPlaced = layout.some((s) => s.id === shipId);
                 return (
                   <ShipItem
                     key={shipId}
                     shipId={shipId}
                     direction={direction}
                     size={size}
-                    isPlaced={isPlaced}
+                    isPlaced={placedIds.has(shipId)}
                     onPointerDown={(e, indexCell) =>
                       onPointerDown(e, variant, indexCell)
                     }

@@ -1,16 +1,20 @@
 import * as React from "react";
-import { usePlacementStore } from "@store/placementStore.ts";
+import { memo } from "react";
 import cn from "clsx";
 
 interface PlacementCellProps {
   cellKey: string;
   occupiedCell: string | undefined;
+  preview: "ship" | "space" | undefined;
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
-export function PlacementCell({ cellKey, occupiedCell, onPointerDown }: PlacementCellProps) {
-  const preview = usePlacementStore((s) => s.previewCells?.[cellKey]);
-
+export const PlacementCell = memo(function PlacementCell({
+  cellKey,
+  occupiedCell,
+  preview,
+  onPointerDown,
+}: PlacementCellProps) {
   const isShip = occupiedCell !== undefined && occupiedCell !== "space";
 
   return (
@@ -34,4 +38,4 @@ export function PlacementCell({ cellKey, occupiedCell, onPointerDown }: Placemen
       )}
     </div>
   );
-}
+});

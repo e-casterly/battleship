@@ -11,30 +11,27 @@ interface PlacementBoardProps {
   onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
 }
 
+const [rows, cols] = BOARD_SIZE;
+
+const cells = Array.from({ length: rows }, (_, r) =>
+  Array.from({ length: cols }, (_, c) => getStringCoordinate([r, c])),
+).flat();
+
 export function PlacementBoard({ onPointerDown }: PlacementBoardProps) {
-  const [rows, cols] = BOARD_SIZE;
   const isDragging = usePlacementStore((s) => s.dragInfo.isDraggable);
   const layout = usePlacementStore((s) => s.layout);
+  const previewCells = usePlacementStore((s) => s.previewCells);
 
   const occupiedCells = useMemo(() => getOccupiedCells(layout), [layout]);
 
-  const cells = useMemo(() => {
-    const arr = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        arr.push({ key: getStringCoordinate([r, c]) });
-      }
-    }
-    return arr;
-  }, [rows, cols]);
-
   return (
     <BoardShell rows={rows} cols={cols} isFocused={isDragging} label="Placement board">
-      {cells.map(({ key }) => (
+      {cells.map((key) => (
         <PlacementCell
           key={key}
           cellKey={key}
           occupiedCell={occupiedCells[key]}
+          preview={previewCells[key]}
           onPointerDown={onPointerDown}
         />
       ))}
