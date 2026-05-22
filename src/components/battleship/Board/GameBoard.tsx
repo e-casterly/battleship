@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useGameStore } from "@store/gameStore.ts";
 import { BOARD_SIZE, CURRENT_PLAYER_ID } from "@utils/constants.ts";
 import { getStringCoordinate, titleOfCell } from "@utils/helpers.ts";
@@ -21,10 +22,19 @@ export function GameBoard({ ownerId }: GameBoardProps) {
   const turn = useGameStore((s) => s.turn);
   const hits = useGameStore((s) => s.hits[ownerId]);
   const occupiedCells = useGameStore((s) => s.occupiedCells[ownerId]);
+  const shipsLayout = useGameStore((s) => s.shipsLayout[ownerId]);
 
   const isPlayerBoard = CURRENT_PLAYER_ID === ownerId;
   const isInteractive = !isPlayerBoard && turn === CURRENT_PLAYER_ID;
   const isFocused = turn !== null && turn !== ownerId;
+
+  const marginCells = useMemo(() => {
+    const set = new Set<string>();
+    for (const ship of shipsLayout ?? []) {
+      for (const pos of ship.margins) set.add(getStringCoordinate(pos));
+    }
+    return set;
+  }, [shipsLayout]);
 
   return (
     <BoardShell rows={rows} cols={cols} isFocused={isFocused} label={`Board ${ownerId}`}>
@@ -38,6 +48,7 @@ export function GameBoard({ ownerId }: GameBoardProps) {
           isInteractive={isInteractive}
           occupiedCell={occupiedCells?.[key]}
           hitStatus={hits?.[key] as CellStatus | undefined}
+          isSpace={isPlayerBoard && marginCells.has(key)}
         />
       ))}
     </BoardShell>

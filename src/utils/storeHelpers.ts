@@ -27,6 +27,7 @@ export const setDataForPlayers = <T>(
   ) as Record<PlayerId, T>;
 };
 
+// Includes ship positions and margin spaces — used in placement for collision detection and UI
 export const getOccupiedCells = (layout: ShipItemPosition[]): OccupiedCells => {
   const occupied: OccupiedCells = {};
   for (const ship of layout) {
@@ -40,12 +41,23 @@ export const getOccupiedCells = (layout: ShipItemPosition[]): OccupiedCells => {
   return occupied;
 };
 
+// Ship positions only — used in game phase for fire lookup
+export const getShipCells = (layout: ShipItemPosition[]): OccupiedCells => {
+  const occupied: OccupiedCells = {};
+  for (const ship of layout) {
+    for (const pos of ship.positions) {
+      occupied[getStringCoordinate(pos)] = ship.id;
+    }
+  }
+  return occupied;
+};
+
 export const setOccupiedCellsForPlayers = (
   playersIds: PlayerId[],
   layouts: ShipsLayout,
 ) =>
   Object.fromEntries(
-    playersIds.map((id) => [id, getOccupiedCells(layouts[id])]),
+    playersIds.map((id) => [id, getShipCells(layouts[id])]),
   );
 
 export const getFullRemainingShips = (fleetConfig: FleetConfig) => {

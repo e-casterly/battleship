@@ -23,11 +23,10 @@ import type {
   PlayerData,
   PlayerId,
   Phase,
+  ShipItemPosition,
   ShipsLayout,
   ShipType,
 } from "@utils/gameTypes.ts";
-import { usePlacementStore } from "@store/placementStore.ts";
-
 interface GameState {
   playersData: PlayerData[];
   phase: Phase;
@@ -42,7 +41,7 @@ interface GameState {
 }
 
 interface GameActions {
-  startGame: () => void;
+  startGame: (layout: ShipItemPosition[]) => void;
   startNewGame: () => void;
   resetSameGame: () => void;
   switchTurn: () => void;
@@ -66,14 +65,11 @@ const getEmptyGameplayState = () => ({
   turn: null as PlayerId | null,
   history: [] as string[],
   move: 0,
-  hits: setDataForPlayers(PLAYERS_IDS, {}),
-  fleetShots: setDataForPlayers(PLAYERS_IDS, {}),
-  shipsLayout: setDataForPlayers(PLAYERS_IDS, [] as never),
-  occupiedCells: setDataForPlayers(PLAYERS_IDS, {} as OccupiedCells),
-  remainingShips: setDataForPlayers(
-    PLAYERS_IDS,
-    {} as Record<ShipType, number>,
-  ),
+  hits: setDataForPlayers(PLAYERS_IDS, () => ({} as Hits[string])),
+  fleetShots: setDataForPlayers(PLAYERS_IDS, () => ({} as FleetShots[string])),
+  shipsLayout: setDataForPlayers(PLAYERS_IDS, () => [] as ShipItemPosition[]),
+  occupiedCells: setDataForPlayers(PLAYERS_IDS, () => ({} as OccupiedCells)),
+  remainingShips: setDataForPlayers(PLAYERS_IDS, () => ({} as Record<ShipType, number>)),
 });
 
 export const useGameStore = create<GameStore>()(
@@ -106,8 +102,7 @@ export const useGameStore = create<GameStore>()(
         );
       },
 
-      startGame: () => {
-        const { layout } = usePlacementStore.getState();
+      startGame: (layout) => {
         const aiLayout = generateShipPositions(BOARD_SIZE, FLEET_CONFIG);
         const shipsLayout: ShipsLayout = {
           [CURRENT_PLAYER_ID]: layout,
@@ -132,7 +127,6 @@ export const useGameStore = create<GameStore>()(
       },
 
       startNewGame: () => {
-        usePlacementStore.getState().resetPlacementState([]);
         set(getEmptyGameplayState(), false, "startNewGame");
       },
 
@@ -144,7 +138,7 @@ export const useGameStore = create<GameStore>()(
         const state = get();
         const shipId = state.occupiedCells[defenderId]?.[cellKey];
 
-        if (shipId !== undefined && shipId !== "space") {
+        if (shipId !== undefined) {
           const newHitsAmount = state.fleetShots[defenderId][shipId] - 1;
           const isSunk = newHitsAmount === 0;
 

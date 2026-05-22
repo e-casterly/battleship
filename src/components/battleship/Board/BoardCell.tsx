@@ -12,6 +12,7 @@ interface BoardCellProps {
   isInteractive: boolean;
   occupiedCell: string | undefined;
   hitStatus: CellStatus | undefined;
+  isSpace: boolean;
   className?: string;
 }
 
@@ -23,9 +24,10 @@ export const BoardCell = memo(function BoardCell({
   isInteractive,
   occupiedCell,
   hitStatus,
+  isSpace,
   className,
 }: BoardCellProps) {
-  const isShip = occupiedCell !== undefined && occupiedCell !== "space";
+  const isShip = occupiedCell !== undefined;
   const isDisable = hitStatus !== undefined || !isInteractive;
 
   function onClickCell() {
@@ -52,7 +54,7 @@ export const BoardCell = memo(function BoardCell({
       aria-label={title}
       data-coord={cellKey}
     >
-      {isPlayerBoard && occupiedCell === "space" && (
+      {isPlayerBoard && isSpace && (
         <div className="h-1 w-1 xl:h-2 xl:w-2 bg-note rounded-full" />
       )}
       {hitStatus === "hit" && (

@@ -28,7 +28,7 @@ export interface PlayerData {
 }
 
 export type ShipsLayout = Record<PlayerId, ShipItemPosition[]>;
-export type OccupiedCells = Record<string, string>; // value is shipId or "space"
+export type OccupiedCells = Record<string, string>; // value is shipId
 export type PreviewCells = Record<string, "ship" | "space">;
 export type Hits = Record<PlayerId, HitStatus>;
 export type FleetShots = Record<PlayerId, PlayerFleetShots>;
