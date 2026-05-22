@@ -29,18 +29,7 @@ export function useComputerTurn() {
       .getState()
       .fire(CURRENT_PLAYER_ID, cellKey);
 
-    const newRemainingCoords = new Set(remainingCoords);
-    for (const coord of excludedCoords) newRemainingCoords.delete(coord);
-
-    let newFocusCoords = [...focusCoords];
-    if (result === "hit") newFocusCoords = [...newFocusCoords, nextPoint];
-    else if (result === "sunk") newFocusCoords = [];
-
-    useAiStore.getState().setAiState({
-      remainingCoords: newRemainingCoords,
-      focusCoords: newFocusCoords,
-    });
-
+    useAiStore.getState().applyShot(excludedCoords, result, nextPoint);
     useGameStore.getState().setHistory(result, { cellKey, shipType });
 
     if (result === "miss") {

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { getFreeCoordsSet } from "@utils/helpers.ts";
 import { BOARD_SIZE } from "@utils/constants.ts";
-import type { Coord } from "@utils/gameTypes.ts";
+import type { CellStatus, Coord } from "@utils/gameTypes.ts";
 
 interface AiState {
   remainingCoords: Set<string>;
@@ -11,10 +11,7 @@ interface AiState {
 
 interface AiActions {
   resetAiState: () => void;
-  setAiState: (state: {
-    remainingCoords: Set<string>;
-    focusCoords: Coord[];
-  }) => void;
+  applyShot: (excludedCoords: string[], result: CellStatus, hitPoint: Coord) => void;
 }
 
 type AiStore = AiState & AiActions;
@@ -32,7 +29,21 @@ export const useAiStore = create<AiStore>()(
           "resetAiState",
         ),
 
-      setAiState: (state) => set(state, false, "setAiState"),
+      applyShot: (excludedCoords, result, hitPoint) =>
+        set(
+          (state) => {
+            const newRemainingCoords = new Set(state.remainingCoords);
+            for (const coord of excludedCoords) newRemainingCoords.delete(coord);
+
+            let newFocusCoords = [...state.focusCoords];
+            if (result === "hit") newFocusCoords = [...newFocusCoords, hitPoint];
+            else if (result === "sunk") newFocusCoords = [];
+
+            return { remainingCoords: newRemainingCoords, focusCoords: newFocusCoords };
+          },
+          false,
+          "applyShot",
+        ),
     }),
     { name: "AiStore" },
   ),
