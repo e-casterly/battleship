@@ -15,7 +15,7 @@ export function BattleView() {
       </div>
       <div className="w-full grid grid-cols-12 gap-3 sm:gap-4 md:gap-8 xl:gap-12">
         {players.map((player) => (
-          <PlayerPart key={player.id} id={player.id} name={player.name} />
+          <PlayerPart key={player.id} id={player.id} />
         ))}
       </div>
     </>

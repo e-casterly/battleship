@@ -57,14 +57,6 @@ export const getFullRemainingShips = (fleetConfig: FleetConfig) => {
   return ships;
 };
 
-export const getEmptyRemainingShips = (fleetConfig: FleetConfig) => {
-  const ships = {} as Record<ShipType, number>;
-  for (const key in fleetConfig) {
-    ships[key as keyof FleetConfig] = 0;
-  }
-  return ships;
-};
-
 export const setFleetShots = (
   playersIds: PlayerId[],
   layout: ShipsLayout,

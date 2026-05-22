@@ -1,44 +1,36 @@
+import { memo } from "react";
 import { useGameStore } from "@store/gameStore.ts";
-import { CURRENT_PLAYER_ID } from "@utils/constants.ts";
-import type { PlayerId } from "@utils/gameTypes.ts";
-import cn from 'clsx';
+import cn from "clsx";
 import Icon from "@components/common/Icon/Icon.tsx";
+import type { CellStatus, PlayerId } from "@utils/gameTypes.ts";
 
 interface BoardCellProps {
   cellKey: string;
   title: string;
   ownerId: PlayerId;
+  isPlayerBoard: boolean;
+  isInteractive: boolean;
+  occupiedCell: string | undefined;
+  hitStatus: CellStatus | undefined;
   className?: string;
 }
-export function BoardCell({
+
+export const BoardCell = memo(function BoardCell({
   cellKey,
   title,
   ownerId,
+  isPlayerBoard,
+  isInteractive,
+  occupiedCell,
+  hitStatus,
   className,
 }: BoardCellProps) {
-  const turn = useGameStore((s) => s.turn);
-
-  const occupiedCell = useGameStore((s) => s.occupiedCells?.[ownerId]?.[cellKey]);
-
   const isShip = occupiedCell !== undefined && occupiedCell !== "space";
-
-  const isPlayerBoard = CURRENT_PLAYER_ID === ownerId;
-
-  const hitStatus =
-    useGameStore((s) => s.hits?.[ownerId]?.[cellKey]) || undefined;
-
-  const isDisable =
-    hitStatus !== undefined ||
-    isPlayerBoard ||
-    turn !== CURRENT_PLAYER_ID ||
-    !ownerId ||
-    !cellKey;
-
-  const playerMove = useGameStore((s) => s.playerMove);
+  const isDisable = hitStatus !== undefined || !isInteractive;
 
   function onClickCell() {
     if (isDisable) return;
-    playerMove(ownerId, cellKey);
+    useGameStore.getState().playerMove(ownerId, cellKey);
   }
 
   const iconClasses = "absolute inset-0 w-8/12 h-8/12 m-auto";
@@ -51,10 +43,7 @@ export function BoardCell({
         "border border-stroke",
         "disabled:pointer-events-none disabled:cursor-default",
         { "touch-none focus-visible:outline-none": isDisable },
-        {
-          "hover:bg-primary/20 hover:border-primary z-10 cursor-pointer":
-            !isDisable,
-        },
+        { "hover:bg-primary/20 hover:border-primary z-10 cursor-pointer": !isDisable },
         { "bg-primary/80": isPlayerBoard && isShip },
         className,
       )}
@@ -64,7 +53,7 @@ export function BoardCell({
       data-coord={cellKey}
     >
       {isPlayerBoard && occupiedCell === "space" && (
-        <div className={cn("h-1 w-1 xl:h-2 xl:w-2 bg-note rounded-full")}></div>
+        <div className="h-1 w-1 xl:h-2 xl:w-2 bg-note rounded-full" />
       )}
       {hitStatus === "hit" && (
         <div className={cn(iconClasses, "animate-appearing")}>
@@ -83,4 +72,4 @@ export function BoardCell({
       )}
     </button>
   );
-}
+});

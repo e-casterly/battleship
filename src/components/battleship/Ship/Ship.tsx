@@ -1,6 +1,7 @@
+import { memo } from "react";
 import Icon from "@components/common/Icon/Icon.tsx";
 import { useGameStore } from "@store/gameStore.ts";
-import cn from 'clsx';
+import cn from "clsx";
 import type { FleetConfig, PlayerId } from "@utils/gameTypes.ts";
 
 interface ShipProps {
@@ -10,7 +11,7 @@ interface ShipProps {
   maxShips?: number;
 }
 
-export default function Ship({
+export default memo(function Ship({
   variant,
   playerId,
   size = 0,
@@ -72,4 +73,4 @@ export default function Ship({
       </div>
     </div>
   );
-}
+});

@@ -15,7 +15,6 @@ import {
 } from "@utils/storeHelpers.ts";
 import { getStringCoordinate, titleOfCell } from "@utils/helpers.ts";
 import { generateShipPositions } from "@utils/generateShipPositions.ts";
-import { getNextPoint } from "@utils/aiLogic.ts";
 import type {
   CellStatus,
   FleetShots,
@@ -28,7 +27,6 @@ import type {
   ShipType,
 } from "@utils/gameTypes.ts";
 import { usePlacementStore } from "@store/placementStore.ts";
-import { useAiStore } from "@store/aiStore.ts";
 
 interface GameState {
   playersData: PlayerData[];
@@ -54,7 +52,6 @@ interface GameActions {
     cellKey: string,
   ) => { result: CellStatus; excludedCoords: string[]; shipType?: ShipType };
   playerMove: (playerId: PlayerId, cellKey: string) => void;
-  computerMove: () => boolean;
   setHistory: (
     event: "start" | "turn" | "miss" | "hit" | "sunk" | "win",
     options: { cellKey?: string; shipType?: string },
@@ -136,12 +133,10 @@ export const useGameStore = create<GameStore>()(
 
       startNewGame: () => {
         usePlacementStore.getState().resetPlacementState([]);
-        useAiStore.getState().resetAiState();
         set(getEmptyGameplayState(), false, "startNewGame");
       },
 
       resetSameGame: () => {
-        useAiStore.getState().resetAiState();
         set(getEmptyGameplayState(), false, "resetSameGame");
       },
 
@@ -218,46 +213,6 @@ export const useGameStore = create<GameStore>()(
         } else {
           get().checkWinner(defenderId);
         }
-      },
-
-      computerMove: () => {
-        const { remainingCoords, focusCoords } = useAiStore.getState();
-        const nextPoint = getNextPoint(remainingCoords, focusCoords);
-        if (!nextPoint) {
-          get().switchTurn();
-          return false;
-        }
-
-        const cellKey = getStringCoordinate(nextPoint);
-        const { result, excludedCoords, shipType } = get().fire(
-          CURRENT_PLAYER_ID,
-          cellKey,
-        );
-
-        const newRemainingCoords = new Set(remainingCoords);
-        for (const coord of excludedCoords) newRemainingCoords.delete(coord);
-
-        let newFocusCoords = [...focusCoords];
-        if (result === "hit") {
-          newFocusCoords = [...newFocusCoords, nextPoint];
-        } else if (result === "sunk") {
-          newFocusCoords = [];
-        }
-
-        useAiStore.getState().setAiState({
-          remainingCoords: newRemainingCoords,
-          focusCoords: newFocusCoords,
-        });
-
-        get().setHistory(result, { cellKey, shipType });
-
-        if (result === "miss") {
-          get().switchTurn();
-          return false;
-        }
-
-        const winner = get().checkWinner(CURRENT_PLAYER_ID);
-        return !winner;
       },
 
       setHistory: (event, { cellKey = "", shipType = "" }) => {
