@@ -28,6 +28,26 @@ import type {
   Hits,
   FleetShots,
 } from "@utils/gameTypes.ts";
+
+type HistoryEvent = "start" | "turn" | "miss" | "hit" | "sunk" | "win";
+
+interface HistoryCtx {
+  attackerName?: string;
+  cellTitle?: string;
+  shipType?: string;
+  move?: number;
+}
+
+const NOTE_BUILDERS: Record<HistoryEvent, (ctx: HistoryCtx) => string> = {
+  start: () => "Game started",
+  turn: ({ move, attackerName }) => `Turn ${move} - ${attackerName}'s move`,
+  miss: ({ attackerName, cellTitle }) => `- ${attackerName} missed on ${cellTitle}`,
+  hit: ({ attackerName, cellTitle }) => `- ${attackerName} hit on ${cellTitle}`,
+  sunk: ({ attackerName, shipType, cellTitle }) =>
+    `- ${attackerName} sunk ${shipType} ship on ${cellTitle}`,
+  win: ({ attackerName }) => `${attackerName} won the game!`,
+};
+
 interface GameState {
   playersData: PlayerData[];
   phase: Phase;
@@ -52,8 +72,8 @@ interface GameActions {
   ) => { result: CellStatus; excludedCoords: string[]; shipType?: ShipType };
   playerMove: (playerId: PlayerId, cellKey: string) => void;
   setHistory: (
-    event: "start" | "turn" | "miss" | "hit" | "sunk" | "win",
-    options: { cellKey?: string; shipType?: string },
+    event: HistoryEvent,
+    options?: { cellKey?: string; shipType?: string },
   ) => void;
   checkWinner: (defenderId: string) => boolean;
 }
@@ -83,7 +103,7 @@ export const useGameStore = create<GameStore>()(
         const [player1, player2] = PLAYERS_IDS;
         const nextTurn = currentTurn === player1 ? player2 : player1;
         set({ turn: nextTurn, move: get().move + 1 }, false, "switchTurn");
-        get().setHistory("turn", {});
+        get().setHistory("turn");
       },
 
       startGame: (layout) => {
@@ -106,7 +126,7 @@ export const useGameStore = create<GameStore>()(
           false,
           "startGame",
         );
-        get().setHistory("start", {});
+        get().setHistory("start");
         get().switchTurn();
       },
 
@@ -139,23 +159,15 @@ export const useGameStore = create<GameStore>()(
         }
       },
 
-      setHistory: (event, { cellKey = "", shipType = "" }) => {
-        const attackerName = get().playersData.find(
-          (p) => p.id === get().turn,
-        )?.name;
-        const cellTitle = cellKey ? titleOfCell(cellKey) : "";
-        let newNote = "";
-        if (event === "start") newNote = "Game started";
-        else if (event === "turn")
-          newNote = `Turn ${get().move} - ${attackerName}'s move`;
-        else if (event === "miss")
-          newNote = `- ${attackerName} missed on ${cellTitle}`;
-        else if (event === "hit")
-          newNote = `- ${attackerName} hit on ${cellTitle}`;
-        else if (event === "sunk")
-          newNote = `- ${attackerName} sunk ${shipType} ship on ${cellTitle}`;
-        else if (event === "win") newNote = `${attackerName} won the game!`;
-        set({ history: [...get().history, newNote] }, false, "setHistory");
+      setHistory: (event, { cellKey = "", shipType = "" } = {}) => {
+        const attackerName = get().playersData.find(p => p.id === get().turn)?.name;
+        const ctx: HistoryCtx = {
+          attackerName,
+          cellTitle: cellKey ? titleOfCell(cellKey) : "",
+          shipType,
+          move: get().move,
+        };
+        set({ history: [...get().history, NOTE_BUILDERS[event](ctx)] }, false, "setHistory");
       },
 
       checkWinner: (defenderId) => {
@@ -164,7 +176,7 @@ export const useGameStore = create<GameStore>()(
           0,
         );
         if (total === 0) {
-          get().setHistory("win", {});
+          get().setHistory("win");
           set({ phase: "game-over", turn: null }, false, "checkWinner");
           return true;
         }
