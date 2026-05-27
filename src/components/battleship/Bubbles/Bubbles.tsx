@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRandomIntInclusive } from "@utils/helpers.ts";
+import { getRandomIntInclusive } from "@utils/helpers/getRandomIntInclusive.ts";
 
 type Bubble = {
   id: number;

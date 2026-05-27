@@ -1,8 +1,9 @@
 import Ship from "@components/battleship/Ship/Ship.tsx";
-import { GameBoard } from "@components/battleship/Board/GameBoard.tsx";
+import { GameBoard } from "@components/battleship/Game/GameBoard.tsx";
 import { FLEET_CONFIG, CURRENT_PLAYER_ID, TOTAL_SHIPS } from "@utils/constants.ts";
-import type { PlayerData, ShipType } from "@utils/gameTypes.ts";
 import cn from "clsx";
+import type { ShipType } from "@app-types/common.types.ts";
+import type { PlayerData } from "@app-types/game.types.ts";
 
 interface PlayerPartProps {
   id: PlayerData["id"];

@@ -1,7 +1,7 @@
-import { useGameStore } from "@store/gameStore.ts";
 import { PlayerPart } from "@components/battleship/Game/PlayerPart.tsx";
 import { History } from "@components/battleship/History/History.tsx";
 import { PlayerName } from "@components/battleship/Game/PlayerName.tsx";
+import { useGameStore } from "@store/game/useGameStore.ts";
 
 export function BattleView() {
   const players = useGameStore((s) => s.playersData);

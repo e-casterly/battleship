@@ -1,11 +1,11 @@
 import Icon from "@components/common/Icon/Icon.tsx";
 import Button from "@components/common/Button/Button.tsx";
-import { useGameStore } from "@store/gameStore.ts";
-import { usePlacementStore } from "@store/placementStore.ts";
+import { usePlacementStore } from "@store/placement/usePlacementStore.ts";
 import { CURRENT_PLAYER_ID } from "@utils/constants.ts";
 import { useState } from "react";
-import cn from 'clsx';
+import cn from "clsx";
 import { ThemeToggle } from "@components/battleship/Header/ThemeToggle.tsx";
+import { useGameStore } from "@store/game/useGameStore.ts";
 
 export function Menu() {
   const startNewGame = useGameStore((s) => s.startNewGame);
@@ -56,15 +56,21 @@ export function Menu() {
             <Icon name="close" size="auto" />
           </Button>
           <div className="flex-1 flex flex-col gap-2 justify-center">
-            <div className="my-2">
+            <div className="my-2 flex flex-col items-center">
               <ThemeToggle />
             </div>
             {phase !== "placement" && (
               <>
-                <Button variant="text" onClick={() => handleClick(handleResetSameGame)}>
+                <Button
+                  variant="text"
+                  onClick={() => handleClick(handleResetSameGame)}
+                >
                   Reset
                 </Button>
-                <Button variant="text" onClick={() => handleClick(startNewGame)}>
+                <Button
+                  variant="text"
+                  onClick={() => handleClick(startNewGame)}
+                >
                   Start new game
                 </Button>
               </>

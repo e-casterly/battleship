@@ -1,8 +1,8 @@
-import { useGameStore } from "@store/gameStore.ts";
-import { useComputerTurn } from "@utils/useComputerTurn.ts";
-import { ShipPlacement } from "@components/battleship/ShipPlacement/ShipPlacement.tsx";
+import { useComputerTurn } from "@utils/ai/useComputerTurn.ts";
+import { ShipPlacement } from "@components/battleship/Placement/ShipPlacement.tsx";
 import { BattleView } from "@components/battleship/Game/BattleView.tsx";
 import { GameOverBanner } from "@components/battleship/Game/GameOverBanner.tsx";
+import { useGameStore } from "@store/game/useGameStore.ts";
 
 export default function Game() {
   useComputerTurn();

@@ -1,4 +1,4 @@
-import type { FleetConfig } from "@utils/gameTypes.ts";
+import type { FleetConfig } from "@app-types/common.types.ts";
 
 export const BOARD_SIZE: [number, number] = [10, 10]; // [rows, cols]
 

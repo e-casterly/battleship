@@ -1,7 +1,7 @@
-import { useGameStore } from "@store/gameStore.ts";
-import { usePlacementStore } from "@store/placementStore.ts";
+import { usePlacementStore } from "@store/placement/usePlacementStore.ts";
 import Button from "@components/common/Button/Button.tsx";
 import { Bubbles } from "@components/battleship/Bubbles/Bubbles.tsx";
+import { useGameStore } from "@store/game/useGameStore.ts";
 
 export function GameOverBanner() {
   function onStartNewGame() {

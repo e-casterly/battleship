@@ -1,6 +1,6 @@
-import { useGameStore } from "@store/gameStore.ts";
-import cn from 'clsx';
+import cn from "clsx";
 import Icon from "@components/common/Icon/Icon.tsx";
+import { useGameStore } from "@store/game/useGameStore.ts";
 
 export function PlayerName({
   id,

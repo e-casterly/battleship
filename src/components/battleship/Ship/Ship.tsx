@@ -1,8 +1,9 @@
 import { memo } from "react";
 import Icon from "@components/common/Icon/Icon.tsx";
-import { useGameStore } from "@store/gameStore.ts";
 import cn from "clsx";
-import type { FleetConfig, PlayerId } from "@utils/gameTypes.ts";
+import type { FleetConfig } from "@app-types/common.types.ts";
+import type { PlayerId } from "@app-types/game.types.ts";
+import { useGameStore } from "@store/game/useGameStore.ts";
 
 interface ShipProps {
   variant: keyof FleetConfig;
@@ -66,7 +67,7 @@ export default memo(function Ship({
             className={cn(
               "w-2.5 lg:w-3.5 relative border-stroke border not-last:border-b-0",
               { "bg-primary/80": count > 0 },
-              { "bg-note/80": count === 0 },
+              { "bg-transparent": count === 0 },
             )}
           ></div>
         ))}

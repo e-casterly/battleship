@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useGameStore } from "@store/gameStore.ts";
-import cn from 'clsx';
+
+import cn from "clsx";
+import { useGameStore } from "@store/game/useGameStore.ts";
 
 export function History({ className }: { className?: string }) {
   const history = useGameStore((s) => s.history);
@@ -15,10 +16,7 @@ export function History({ className }: { className?: string }) {
 
   return (
     <div className={cn("border-stroke border p-0.5 sm:p-1", className)}>
-      <div
-        ref={logRef}
-        className="h-10 md:h-20 lg:h-26 overflow-y-auto"
-      >
+      <div ref={logRef} className="h-10 md:h-20 lg:h-26 overflow-y-auto">
         {history.map((item, index) => (
           <div className="text-tiny md:text-xs xl:text-sm" key={index}>
             {item}
