@@ -9,7 +9,7 @@ describe("getRemainingShips", () => {
     expect(result.galleon).toBe(1);
     expect(result.frigate).toBe(1);
     expect(result.brigantine).toBe(1);
-    expect(result.schooner).toBe(1);
+    expect(result.schooner).toBe(2);
     expect(result.sloop).toBe(2);
   });
 

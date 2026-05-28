@@ -5,7 +5,7 @@ import type { DragInfo } from "@app-types/placement.types.ts";
 const makeDragInfo = (overrides: Partial<DragInfo> = {}): DragInfo => ({
   isDraggable: true,
   shipId: "ship-1",
-  shipVariant: "sloop",
+  shipVariant: "schooner",
   indexCell: 0,
   occupiedCells: {},
   shipSize: 2,
@@ -26,12 +26,12 @@ describe("computeShipPosition", () => {
 
   describe("returns null when placement is out of bounds", () => {
     it("returns null when a horizontal ship extends past the right edge", () => {
-      // sloop size 2 at col 9: cells [0,9],[0,10] — col 10 is out
+      // schooner size 2 at col 9: cells [0,9],[0,10] — col 10 is out
       expect(computeShipPosition("0,9", makeDragInfo(), "h")).toBeNull();
     });
 
     it("returns null when a vertical ship extends past the bottom edge", () => {
-      // sloop size 2 at row 9: cells [9,0],[10,0] — row 10 is out
+      // schooner size 2 at row 9: cells [9,0],[10,0] — row 10 is out
       expect(computeShipPosition("9,0", makeDragInfo(), "v")).toBeNull();
     });
   });
@@ -57,7 +57,7 @@ describe("computeShipPosition", () => {
 
     it("has the correct id and type", () => {
       expect(result.id).toBe("ship-1");
-      expect(result.type).toBe("sloop");
+      expect(result.type).toBe("schooner");
     });
 
     it("positions extend rightward from the drop cell", () => {
@@ -85,7 +85,7 @@ describe("computeShipPosition", () => {
 
   describe("indexCell > 0 — ship straddles the drop cell", () => {
     it("offsets positions correctly when dragging by a non-first cell", () => {
-      // sloop size 2, indexCell=1 at [3,4] → ship should occupy [[3,3],[3,4]]
+      // schooner size 2, indexCell=1 at [3,4] → ship should occupy [[3,3],[3,4]]
       const result = computeShipPosition("3,4", makeDragInfo({ indexCell: 1 }), "h");
       expect(result!.positions).toEqual([[3, 3], [3, 4]]);
     });
