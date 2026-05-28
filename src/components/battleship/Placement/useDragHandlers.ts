@@ -29,7 +29,8 @@ export function useDragHandlers() {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.code !== "Space" || e.repeat) return;
-      if (INTERACTIVE_TAGS.has((e.target as HTMLElement).tagName)) return;
+      const isDragging = usePlacementStore.getState().dragInfo.isDraggable;
+      if (!isDragging && INTERACTIVE_TAGS.has((e.target as HTMLElement).tagName)) return;
       e.preventDefault();
       usePlacementStore.getState().switchDirection();
       if (lastCoordRef.current) {
