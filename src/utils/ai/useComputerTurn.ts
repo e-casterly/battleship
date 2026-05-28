@@ -15,7 +15,7 @@ export function useComputerTurn() {
   const turn = useGameStore((s) => s.turn);
 
   useEffect(() => {
-    if (phase === "placement") {
+    if (phase === "in-game") {
       useAiStore.getState().resetAiState();
     }
   }, [phase]);
@@ -53,17 +53,21 @@ export function useComputerTurn() {
   useEffect(() => {
     if (phase !== "in-game" || turn === CURRENT_PLAYER_ID) return;
 
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const schedule = (delay: number) => {
-      const id = setTimeout(() => {
+      timeoutId = setTimeout(() => {
+        if (cancelled) return;
         const shouldContinue = executeComputerMove();
         if (shouldContinue) schedule(AI_SHOT_DELAY_MS);
       }, delay);
-      timeouts.push(id);
     };
 
     schedule(AI_SHOT_DELAY_MS);
-    return () => timeouts.forEach(clearTimeout);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [phase, turn, executeComputerMove]);
 }
