@@ -70,7 +70,7 @@ export const useGameStore = create<GameStore>()(
             occupiedCells: getOccupiedCellsForPlayers(PLAYERS_IDS, shipsLayout),
             remainingShips: setDataForPlayers(
               PLAYERS_IDS,
-              getRemainingShips(FLEET_CONFIG),
+              () => getRemainingShips(FLEET_CONFIG),
             ),
             fleetHealth: getFleetHealth(PLAYERS_IDS, shipsLayout),
           },
