@@ -6,8 +6,8 @@ export const FLEET_CONFIG: FleetConfig = {
   galleon: { size: 5, count: 1 },
   frigate: { size: 4, count: 1 },
   brigantine: { size: 3, count: 1 },
-  schooner: { size: 3, count: 1 },
-  sloop: { size: 2, count: 2 },
+  schooner: { size: 2, count: 2 },
+  sloop: { size: 1, count: 2 },
 };
 
 export const TOTAL_SHIPS = Object.values(FLEET_CONFIG).reduce((acc, { count }) => acc + count, 0);
